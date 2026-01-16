@@ -1,10 +1,11 @@
-import Layout from "../components/layout/Layout";
-import Home from "../pages/Home";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProductsPage from "../pages/ProductsPage";
 
 export default function App() {
   return (
-    <Layout>
-      <Home />
-    </Layout>
+    <Routes>
+      <Route path="/" element={<Navigate to="/products" replace />} />
+      <Route path="/products" element={<ProductsPage />} />
+    </Routes>
   );
 }
