@@ -153,7 +153,7 @@ export default function ProductsPage() {
                 <Desc>{p.description}</Desc>
                 <Bar>
                   <Price>{formatPrice(p.price_cents)}</Price>
-                  <Btn>Add to cart</Btn>
+                  <Btn onClick={() => addItem(p, 1)}>Add to cart</Btn>
                 </Bar>
               </Body>
             </Card>
