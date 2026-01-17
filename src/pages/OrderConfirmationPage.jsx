@@ -78,10 +78,10 @@ function formatPrice(cents) {
 }
 
 export default function OrderConfirmationPage() {
-  console.log("CONFIRMATION PAGE mounted, orderId:", id);
   const { id } = useParams();
-  const location = useLocation();
+  console.log("CONFIRMATION PAGE mounted, orderId:", id);
 
+  const location = useLocation();
   const [order, setOrder] = useState(location.state?.order || null);
   const [status, setStatus] = useState(order ? "ready" : "loading"); // loading | ready | error
   const [error, setError] = useState("");
