@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import styled from "styled-components";
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar";
+import CartDrawer from "../components/ui/CartDrawer";
 
 const Shell = styled.div`
   min-height: 100vh;
@@ -19,6 +20,7 @@ export default function Layout() {
       <Main>
         <Outlet />
       </Main>
+      <CartDrawer />
     </Shell>
   );
 }
