@@ -124,6 +124,11 @@ export default function ProductsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    document.title = "Products — Hiking Store";
+  }, []);
+
+
   return (
     <Wrap>
       <TitleRow>

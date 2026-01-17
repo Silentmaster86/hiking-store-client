@@ -270,6 +270,11 @@ export default function HomePage() {
     return () => (mounted = false);
   }, []);
 
+  useEffect(() => {
+    document.title = "Hiking Store — Outdoor gear for UK weekends";
+  }, []);
+  
+
   return (
     <>
       <Hero>
@@ -349,10 +354,9 @@ export default function HomePage() {
           <SmallBtn to="/products">See all</SmallBtn>
         </SectionHead>
 
-        {/*{status === "loading" && <Muted>Loading products…</Muted>}*/}
         {status === "error" && <Muted>Couldn’t load products. Check VITE_API_URL.</Muted>}
 
-        {status === "done" && (
+        {status === "loading" && (
           <Grid>
             {[1,2,3].map((n) => (
               <SkeletonCard key={n}>
