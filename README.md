@@ -92,15 +92,18 @@ These features are outside the scope of a Junior Frontend portfolio and would ad
 
 ---
 
-## Screenshots
+## 📸 Screenshots
 
-> Add screenshots of:
->
-> * Products page
-> * Cart drawer
-> * Checkout page
-> * Order confirmation page
-
+### Home Page
+![Home Page Screenshot](./src/assets/screenshots/home.png)
+### Products page
+![Products Page Screenshot](./src/assets/screenshots/products.png)
+### Cart drawer
+![Cart drawer Screenshot](./src/assets/screenshots/cartDrawer.png)
+### Order confirmation page
+![Order confirmation Page Screenshot](./src/assets/screenshots/order_confirmation.png)
+### Checkout Page
+![Checkout Page Screenshot](./src/assets/screenshots/checkout.png)
 ---
 
 ## How to Run Locally
