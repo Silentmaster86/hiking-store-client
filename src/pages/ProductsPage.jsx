@@ -5,7 +5,7 @@ import { fetchProducts } from "../api/products";
 const Wrap = styled.div`
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 8px 0;
 `;
 
 const TitleRow = styled.div`
