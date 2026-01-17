@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 const Bar = styled.header`
   position: sticky;
@@ -80,6 +81,8 @@ const CartBtn = styled.button`
     background: rgba(255, 255, 255, 0.06);
   }
 `;
+const { toggleCart, items } = useCart();
+  const count = items.reduce((s, x) => s + (x.quantity || 0), 0);
 
 export default function Navbar() {
   return (
@@ -98,7 +101,9 @@ export default function Navbar() {
         </Nav>
 
         <Right>
-          <CartBtn type="button">Cart</CartBtn>
+          <CartBtn type="button" onClick={toggleCart}>
+      Cart{count > 0 ? ` (${count})` : ""}
+    </CartBtn>
         </Right>
       </Inner>
     </Bar>
