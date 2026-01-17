@@ -1,7 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 if (!API_URL) {
-  // Nie wywalaj appki, ale ostrzeż w dev
   console.warn("Missing VITE_API_URL. Set it in Netlify / .env.local");
 }
 

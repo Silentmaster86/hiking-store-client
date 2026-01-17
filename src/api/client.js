@@ -12,7 +12,6 @@ export async function request(path, options = {}) {
     throw new Error(`${res.status} ${text}`);
   }
 
-  // jeśli endpoint zwraca pusty body
   const contentType = res.headers.get("content-type") || "";
   if (!contentType.includes("application/json")) return null;
 
