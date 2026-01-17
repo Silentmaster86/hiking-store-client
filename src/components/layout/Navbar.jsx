@@ -1,66 +1,63 @@
 import styled from "styled-components";
-import Container from "../ui/Container";
-import Badge from "../ui/Badge";
-import Button from "../ui/Button";
+import { NavLink } from "react-router-dom";
 
 const Bar = styled.header`
   position: sticky;
   top: 0;
   z-index: 20;
   backdrop-filter: blur(10px);
-  background: rgba(11, 15, 20, 0.75);
+  background: rgba(11, 15, 20, 0.78);
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
-const Row = styled.div`
-  height: 68px;
+const Inner = styled.div`
+  max-width: ${({ theme }) => theme.container.max};
+  padding: 12px ${({ theme }) => theme.container.pad};
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
 `;
 
-const Brand = styled.a`
+const Brand = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 900;
-  letter-spacing: 0.4px;
-
-  span {
-    font-size: 14px;
-    color: ${({ theme }) => theme.colors.muted};
-    font-weight: 700;
-  }
+  letter-spacing: -0.3px;
 `;
 
-const Dot = styled.div`
-  width: 14px;
-  height: 14px;
+const Dot = styled.span`
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.primary2});
-  box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.10);
+  background: ${({ theme }) => theme.colors.primary};
+  box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.14);
 `;
 
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 10px;
-
-  @media (max-width: 680px) {
-    display: none;
-  }
+  gap: 8px;
 `;
 
-const Link = styled.a`
-  padding: 10px 10px;
-  border-radius: 10px;
+const LinkPill = styled(NavLink)`
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 800;
   color: ${({ theme }) => theme.colors.muted};
-  font-weight: 700;
+  border: 1px solid transparent;
+
+  &.active {
+    color: ${({ theme }) => theme.colors.text};
+    background: rgba(255, 255, 255, 0.04);
+    border-color: ${({ theme }) => theme.colors.border};
+  }
 
   &:hover {
-    background: rgba(255,255,255,0.06);
     color: ${({ theme }) => theme.colors.text};
+    background: rgba(255, 255, 255, 0.03);
   }
 `;
 
@@ -70,49 +67,40 @@ const Right = styled.div`
   gap: 10px;
 `;
 
-const CartBtn = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: ${({ theme }) => theme.colors.surface};
+const CartBtn = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.border};
+  background: rgba(255, 255, 255, 0.03);
+  color: ${({ theme }) => theme.colors.text};
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 800;
 
-  &:hover { border-color: rgba(255,255,255,0.18); }
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 `;
 
 export default function Navbar() {
-  // TODO: później podłączymy z backendu: ilość itemów w koszyku
-  const cartCount = 0;
-
   return (
     <Bar>
-      <Container>
-        <Row>
-          <Brand href="/">
-            <Dot />
-            <div>
-              Hiking Store <span>UK</span>
-            </div>
-          </Brand>
+      <Inner>
+        <Brand to="/" end>
+          <Dot />
+          Hiking Store
+        </Brand>
 
-          <Nav>
-            <Link href="/">Home</Link>
-            <Link href="/products">Shop</Link>
-            <Link href="/orders">Orders</Link>
-          </Nav>
+        <Nav>
+          <LinkPill to="/" end>
+            Home
+          </LinkPill>
+          <LinkPill to="/products">Products</LinkPill>
+        </Nav>
 
-          <Right>
-            <CartBtn href="/cart" aria-label="Cart">
-              Cart <Badge>{cartCount}</Badge>
-            </CartBtn>
-            <Button as="a" href="/auth" $variant="primary">
-              Sign in
-            </Button>
-          </Right>
-        </Row>
-      </Container>
+        <Right>
+          <CartBtn type="button">Cart</CartBtn>
+        </Right>
+      </Inner>
     </Bar>
   );
 }
