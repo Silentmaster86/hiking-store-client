@@ -79,7 +79,6 @@ function formatPrice(cents) {
 
 export default function OrderConfirmationPage() {
   const { id } = useParams();
-  console.log("CONFIRMATION PAGE mounted, orderId:", id);
 
   const location = useLocation();
   const [order, setOrder] = useState(location.state?.order || null);
@@ -100,9 +99,7 @@ export default function OrderConfirmationPage() {
       setError("");
 
       try {
-        console.log("Fetching order:", id);
         const data = await getOrderById(id);
-        console.log("Order response:", data);
         const fetched = data?.order ?? data;
 
         if (!alive) return;
@@ -149,7 +146,7 @@ export default function OrderConfirmationPage() {
               <Val>{formatPrice(order.total_cents)}</Val>
             </Row>
 
-            <Btn to={`/orders/${order.id}`}>View order details</Btn>
+            <Btn to={`/orders/${order.id}`}>Sign in to view full order details</Btn>
             <Btn to="/products">Continue shopping</Btn>
           </>
         )}
