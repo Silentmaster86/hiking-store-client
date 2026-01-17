@@ -1,69 +1,30 @@
 // src/api/cart.js
-const BASE = import.meta.env.VITE_API_URL;
-
-function authHeaders() {
-  const token = localStorage.getItem("token"); // jeśli masz auth
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-async function request(path, { method = "GET", body } = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  let data = null;
-  const text = await res.text();
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text || null;
-  }
-
-  if (!res.ok) {
-    const msg =
-      (data && (data.message || data.error)) ||
-      `Request failed (${res.status})`;
-    throw new Error(msg);
-  }
-
-  return data;
-}
+import { apiRequest } from "./http";
 
 // GET /cart
 export function getCart() {
-  return request("/cart");
+  return apiRequest("/cart", { method: "GET" });
 }
 
-// POST /cart/items  { productId, qty }
-export function addCartItem(productId, qty = 1) {
-  return request("/cart/items", {
+// POST /cart/items  { productId, quantity }
+export function addCartItem(productId, quantity = 1) {
+  return apiRequest("/cart/items", {
     method: "POST",
-    body: { productId, qty },
+    body: JSON.stringify({ productId, quantity }),
   });
 }
 
-// PATCH /cart/items/:id  { qty }
-export function updateCartItem(itemId, qty) {
-  return request(`/cart/items/${itemId}`, {
+// PATCH /cart/items/:id  { quantity }
+export function updateCartItem(cartItemId, quantity) {
+  return apiRequest(`/cart/items/${cartItemId}`, {
     method: "PATCH",
-    body: { qty },
+    body: JSON.stringify({ quantity }),
   });
 }
 
 // DELETE /cart/items/:id
-export function removeCartItem(itemId) {
-  return request(`/cart/items/${itemId}`, {
+export function removeCartItem(cartItemId) {
+  return apiRequest(`/cart/items/${cartItemId}`, {
     method: "DELETE",
   });
 }
-
-// (opcjonalnie) DELETE /cart
-export function clearCart() {
-  return request("/cart", { method: "DELETE" });
-}
-

@@ -1,36 +1,33 @@
+// src/context/CartContext.jsx
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getCart, addCartItem, updateCartItem, removeCartItem } from "../api/cart";
 
 const CartContext = createContext(null);
-const STORAGE_KEY = "hiking_store_cart_v1";
-
-function readStored() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { open: false, items: [] };
-    const parsed = JSON.parse(raw);
-    return {
-      open: false,
-      items: Array.isArray(parsed.items) ? parsed.items : [],
-    };
-  } catch {
-    return { open: false, items: [] };
-  }
-}
 
 export function CartProvider({ children }) {
   const [open, setOpen] = useState(false);
+  const [cartId, setCartId] = useState(null);
   const [items, setItems] = useState([]);
+  const [status, setStatus] = useState("idle"); // idle | loading | error | done
+  const [error, setError] = useState("");
 
-  // init from localStorage
+  async function refresh() {
+    setStatus("loading");
+    setError("");
+    try {
+      const data = await getCart(); // { cartId, items }
+      setCartId(data?.cartId ?? null);
+      setItems(Array.isArray(data?.items) ? data.items : []);
+      setStatus("done");
+    } catch (e) {
+      setStatus("error");
+      setError(e.message || "Failed to load cart");
+    }
+  }
+
   useEffect(() => {
-    const data = readStored();
-    setItems(data.items);
+    refresh();
   }, []);
-
-  // persist items
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ items }));
-  }, [items]);
 
   const api = useMemo(() => {
     function openCart() {
@@ -43,55 +40,51 @@ export function CartProvider({ children }) {
       setOpen((v) => !v);
     }
 
-    function addItem(product, qty = 1) {
-      const id = product.id;
-      setItems((prev) => {
-        const next = [...prev];
-        const idx = next.findIndex((x) => x.id === id);
-        if (idx >= 0) {
-          next[idx] = { ...next[idx], quantity: next[idx].quantity + qty };
-        } else {
-          next.unshift({
-            id,
-            name: product.name,
-            price_cents: product.price_cents,
-            quantity: qty,
-          });
-        }
-        return next;
-      });
+    async function addItem(product, quantity = 1) {
+      await addCartItem(product.id, quantity);
+      await refresh();
       setOpen(true);
     }
 
-    function setQty(id, quantity) {
+    // UWAGA: teraz id to cart_item_id (z backendu), nie product.id
+    async function setQty(cartItemId, quantity) {
       const q = Number(quantity);
       if (!Number.isFinite(q)) return;
-      setItems((prev) => {
-        if (q <= 0) return prev.filter((x) => x.id !== id);
-        return prev.map((x) => (x.id === id ? { ...x, quantity: q } : x));
-      });
+
+      if (q <= 0) {
+        await removeCartItem(cartItemId);
+      } else {
+        await updateCartItem(cartItemId, q);
+      }
+      await refresh();
     }
 
-    function removeItem(id) {
-      setItems((prev) => prev.filter((x) => x.id !== id));
+    async function removeItem(cartItemId) {
+      await removeCartItem(cartItemId);
+      await refresh();
     }
 
-    function clear() {
-      setItems([]);
-    }
+    const totalCents = items.reduce(
+      (sum, it) => sum + (Number(it.price_cents || 0) * Number(it.quantity || 0)),
+      0
+    );
 
     return {
       open,
+      cartId,
       items,
+      status,
+      error,
+      totalCents,
       openCart,
       closeCart,
       toggleCart,
+      refresh,
       addItem,
       setQty,
       removeItem,
-      clear,
     };
-  }, [open, items]);
+  }, [open, cartId, items, status, error]);
 
   return <CartContext.Provider value={api}>{children}</CartContext.Provider>;
 }
