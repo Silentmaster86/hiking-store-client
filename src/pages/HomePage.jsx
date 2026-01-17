@@ -352,7 +352,7 @@ export default function HomePage() {
         {/*{status === "loading" && <Muted>Loading products…</Muted>}*/}
         {status === "error" && <Muted>Couldn’t load products. Check VITE_API_URL.</Muted>}
 
-        {status === "loading" && (
+        {status === "done" && (
           <Grid>
             {[1,2,3].map((n) => (
               <SkeletonCard key={n}>
