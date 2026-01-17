@@ -17,8 +17,12 @@ async function parseResponse(res) {
 
 export async function apiRequest(path, options = {}) {
   const res = await fetch(`${API_URL}${path}`, {
-    credentials: "include", ...options,
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    credentials: "include",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
   });
 
   if (!res.ok) {
@@ -32,7 +36,6 @@ export async function apiRequest(path, options = {}) {
   return parseResponse(res);
 }
 
-// zostawiamy, żeby reszta app dalej działała
 export async function apiGet(path, options = {}) {
   return apiRequest(path, { method: "GET", ...options });
 }

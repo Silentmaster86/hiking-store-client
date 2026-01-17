@@ -191,19 +191,8 @@ function formatPrice(cents) {
 }
 
 export default function CartDrawer() {
-  const {
-    open,
-    closeCart,
-    items,
-    status,
-    error,
-    refresh,
-    setQty,
-    removeItem,
-    totalCents,
-  } = useCart();
+  const { open, closeCart, items, status, error, refresh, setQty, removeItem, totalCents } = useCart();
 
-  // (opcjonalnie) zawsze odśwież koszyk przy otwarciu
   useEffect(() => {
     if (open) refresh?.();
   }, [open, refresh]);
@@ -227,22 +216,14 @@ export default function CartDrawer() {
           {status === "error" && (
             <ErrorBox>
               {error || "Cart error"}
-              <div style={{ marginTop: 6, opacity: 0.9 }}>
-                Tip: jeśli cart się resetuje, upewnij się, że fetch ma <b>credentials: "include"</b> i backend ma CORS
-                z <b>credentials: true</b>.
-              </div>
             </ErrorBox>
           )}
 
           {items.length === 0 ? (
-            <Muted>
-              {busy ? "Loading cart…" : "Your cart is empty. Add something from Products."}
-            </Muted>
+            <Muted>{busy ? "Loading cart…" : "Your cart is empty. Add something from Products."}</Muted>
           ) : (
             items.map((it) => {
-              // backend: cart_item_id + quantity + price_cents + name...
               const id = it.cart_item_id;
-
               return (
                 <Row key={id}>
                   <div>
@@ -252,19 +233,11 @@ export default function CartDrawer() {
 
                   <Controls>
                     <Qty>
-                      <QtyBtn
-                        type="button"
-                        disabled={busy}
-                        onClick={() => setQty(id, it.quantity - 1)}
-                      >
+                      <QtyBtn type="button" disabled={busy} onClick={() => setQty(id, it.quantity - 1)}>
                         −
                       </QtyBtn>
                       <QtyVal>{it.quantity}</QtyVal>
-                      <QtyBtn
-                        type="button"
-                        disabled={busy}
-                        onClick={() => setQty(id, it.quantity + 1)}
-                      >
+                      <QtyBtn type="button" disabled={busy} onClick={() => setQty(id, it.quantity + 1)}>
                         +
                       </QtyBtn>
                     </Qty>
@@ -273,11 +246,7 @@ export default function CartDrawer() {
                       <div style={{ fontWeight: 1000 }}>
                         {formatPrice(Number(it.price_cents) * Number(it.quantity))}
                       </div>
-                      <Remove
-                        type="button"
-                        disabled={busy}
-                        onClick={() => removeItem(id)}
-                      >
+                      <Remove type="button" disabled={busy} onClick={() => removeItem(id)}>
                         Remove
                       </Remove>
                     </div>
@@ -302,9 +271,7 @@ export default function CartDrawer() {
             Checkout
           </CTA>
 
-          <Small>
-            This cart is stored in a server session (guest cart) and follows you until cookies expire.
-          </Small>
+          <Small>This cart is stored in a server session (guest cart).</Small>
         </Foot>
       </Panel>
     </>

@@ -1,5 +1,5 @@
 // src/context/CartContext.jsx
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { getCart, addCartItem, updateCartItem, removeCartItem } from "../api/cart";
 
 const CartContext = createContext(null);
@@ -11,11 +11,12 @@ export function CartProvider({ children }) {
   const [status, setStatus] = useState("idle"); // idle | loading | error | done
   const [error, setError] = useState("");
 
-  async function refresh() {
+  // ✅ stable function => no infinite refresh loop
+  const refresh = useCallback(async () => {
     setStatus("loading");
     setError("");
     try {
-      const data = await getCart(); // { cartId, items }
+      const data = await getCart();
       setCartId(data?.cartId ?? null);
       setItems(Array.isArray(data?.items) ? data.items : []);
       setStatus("done");
@@ -23,13 +24,13 @@ export function CartProvider({ children }) {
       setStatus("error");
       setError(e.message || "Failed to load cart");
     }
-  }
+  }, []);
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
 
-  const api = useMemo(() => {
+  const value = useMemo(() => {
     function openCart() {
       setOpen(true);
     }
@@ -46,7 +47,7 @@ export function CartProvider({ children }) {
       setOpen(true);
     }
 
-    // UWAGA: teraz id to cart_item_id (z backendu), nie product.id
+    // id = cart_item_id
     async function setQty(cartItemId, quantity) {
       const q = Number(quantity);
       if (!Number.isFinite(q)) return;
@@ -65,7 +66,7 @@ export function CartProvider({ children }) {
     }
 
     const totalCents = items.reduce(
-      (sum, it) => sum + (Number(it.price_cents || 0) * Number(it.quantity || 0)),
+      (sum, it) => sum + Number(it.price_cents || 0) * Number(it.quantity || 0),
       0
     );
 
@@ -84,9 +85,9 @@ export function CartProvider({ children }) {
       setQty,
       removeItem,
     };
-  }, [open, cartId, items, status, error]);
+  }, [open, cartId, items, status, error, refresh]);
 
-  return <CartContext.Provider value={api}>{children}</CartContext.Provider>;
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
