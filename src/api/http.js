@@ -17,9 +17,8 @@ async function parseResponse(res) {
 
 export async function apiRequest(path, options = {}) {
   const res = await fetch(`${API_URL}${path}`, {
-    credentials: "include",
+    credentials: "include", ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
   });
 
   if (!res.ok) {
