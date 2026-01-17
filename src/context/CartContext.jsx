@@ -21,9 +21,17 @@ export function CartProvider({ children }) {
       setItems(Array.isArray(data?.items) ? data.items : []);
       setStatus("done");
     } catch (e) {
-      setStatus("error");
-      setError(e.message || "Failed to load cart");
-    }
+      console.error("Cart error:", e);
+
+        let message = "Could not load your cart. Please try again.";
+
+        if (e.message === "Failed to fetch") {
+          message = "Cannot connect to the server. Please try again in a moment.";
+        }
+      
+        setStatus("error");
+        setError(message);
+      }
   }, []);
 
   useEffect(() => {

@@ -92,33 +92,6 @@ const Badge = styled.div`
   font-size: 13px;
 `;
 
-const HeroCard = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
-  border-radius: 18px;
-  padding: 16px;
-`;
-
-const Stat = styled.div`
-  display: grid;
-  gap: 6px;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.02);
-`;
-
-const StatNum = styled.div`
-  font-size: 26px;
-  font-weight: 1000;
-`;
-
-const StatLabel = styled.div`
-  color: ${({ theme }) => theme.colors.muted};
-  font-weight: 800;
-  font-size: 13px;
-`;
-
 const Section = styled.section`
   margin-top: 18px;
 `;
@@ -300,53 +273,40 @@ export default function HomePage() {
               <Badge>Built with PERN</Badge>
             </BadgeRow>
           </div>
-
-          <HeroCard>
-            <Stat>
-              <StatNum>Fast</StatNum>
-              <StatLabel>Vite + React UI</StatLabel>
-            </Stat>
-            <div style={{ height: 10 }} />
-            <Stat>
-              <StatNum>Reliable</StatNum>
-              <StatLabel>Render API + Postgres</StatLabel>
-            </Stat>
-            <div style={{ height: 10 }} />
-            <Stat>
-              <StatNum>Clean</StatNum>
-              <StatLabel>Styled-components theme</StatLabel>
-            </Stat>
-          </HeroCard>
         </HeroGrid>
       </Hero>
+
 
       <Section>
         <SectionHead>
           <H2>Why Hiking Store?</H2>
-          <Muted>Simple, solid, portfolio-ready.</Muted>
+          <Muted>Built for real outdoor use.</Muted>
         </SectionHead>
-
+        
         <Cards>
           <InfoCard>
             <InfoTitle>Outdoor-first design</InfoTitle>
             <InfoText>
-              Dark, contrasty UI + strong typography. Easy to extend with categories and filters.
+              Clear layout, strong contrast and easy browsing — even on mobile and in bright daylight.
             </InfoText>
           </InfoCard>
+        
           <InfoCard>
-            <InfoTitle>Guest cart + orders</InfoTitle>
+            <InfoTitle>Guest checkout</InfoTitle>
             <InfoText>
-              Możesz kupować bez logowania, a potem “claim” zamówienie po rejestracji.
+              Buy without creating an account. Register later if you want to track orders.
             </InfoText>
           </InfoCard>
+        
           <InfoCard>
-            <InfoTitle>Deploy-ready</InfoTitle>
+            <InfoTitle>Ready for UK weekends</InfoTitle>
             <InfoText>
-              Frontend on Netlify + backend on Render + Postgres. Idealny układ do portfolio.
+              Practical gear for short hikes, quick escapes and unpredictable weather.
             </InfoText>
           </InfoCard>
         </Cards>
       </Section>
+
 
       <Section id="best">
         <SectionHead>
