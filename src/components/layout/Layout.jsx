@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import styled from "styled-components";
-import Navbar from "../components/Navbar";
+import Navbar from "./Navbar";
 
 const Shell = styled.div`
   min-height: 100vh;
