@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import styled from "styled-components";
 import { useCart } from "../../context/CartContext.jsx";
 
@@ -37,6 +38,19 @@ const Head = styled.div`
 
 const Title = styled.div`
   font-weight: 1000;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+`;
+
+const Tag = styled.span`
+  font-size: 12px;
+  font-weight: 900;
+  color: ${({ theme }) => theme.colors.muted};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: rgba(255,255,255,0.03);
+  padding: 6px 10px;
+  border-radius: 999px;
 `;
 
 const CloseBtn = styled.button`
@@ -75,6 +89,16 @@ const Muted = styled.div`
   font-size: 13px;
 `;
 
+const ErrorBox = styled.div`
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  background: rgba(220, 38, 38, 0.08);
+  color: rgba(220, 38, 38, 0.95);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 800;
+  margin-bottom: 10px;
+`;
+
 const Controls = styled.div`
   display: flex;
   align-items: center;
@@ -98,6 +122,7 @@ const QtyBtn = styled.button`
   font-weight: 1000;
   cursor: pointer;
   &:hover { background: rgba(255,255,255,0.06); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
 `;
 
 const QtyVal = styled.div`
@@ -113,6 +138,7 @@ const Remove = styled.button`
   font-weight: 900;
   cursor: pointer;
   &:hover { color: ${({ theme }) => theme.colors.text}; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
 `;
 
 const Foot = styled.div`
@@ -149,6 +175,7 @@ const CTA = styled.button`
   font-weight: 1100;
   cursor: pointer;
   &:hover { opacity: 0.92; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
 `;
 
 const Small = styled.div`
@@ -164,57 +191,100 @@ function formatPrice(cents) {
 }
 
 export default function CartDrawer() {
-  const { open, closeCart, items, setQty, removeItem } = useCart();
+  const {
+    open,
+    closeCart,
+    items,
+    status,
+    error,
+    refresh,
+    setQty,
+    removeItem,
+    totalCents,
+  } = useCart();
 
-  const totalCents = items.reduce(
-    (sum, it) => sum + Number(it.price_cents || 0) * Number(it.quantity || 0),
-    0
-  );
+  // (opcjonalnie) zawsze odśwież koszyk przy otwarciu
+  useEffect(() => {
+    if (open) refresh?.();
+  }, [open, refresh]);
+
+  const busy = status === "loading";
 
   return (
     <>
       <Overlay $open={open} onClick={closeCart} />
       <Panel $open={open} aria-hidden={!open}>
         <Head>
-          <Title>Cart</Title>
+          <Title>
+            Cart {busy && <Tag>Syncing…</Tag>}
+          </Title>
           <CloseBtn type="button" onClick={closeCart}>
             Close
           </CloseBtn>
         </Head>
 
         <List>
+          {status === "error" && (
+            <ErrorBox>
+              {error || "Cart error"}
+              <div style={{ marginTop: 6, opacity: 0.9 }}>
+                Tip: jeśli cart się resetuje, upewnij się, że fetch ma <b>credentials: "include"</b> i backend ma CORS
+                z <b>credentials: true</b>.
+              </div>
+            </ErrorBox>
+          )}
+
           {items.length === 0 ? (
-            <Muted>Your cart is empty. Add something from Products.</Muted>
+            <Muted>
+              {busy ? "Loading cart…" : "Your cart is empty. Add something from Products."}
+            </Muted>
           ) : (
-            items.map((it) => (
-              <Row key={it.id}>
-                <div>
-                  <Name>{it.name}</Name>
-                  <Muted>{formatPrice(it.price_cents)} each</Muted>
-                </div>
+            items.map((it) => {
+              // backend: cart_item_id + quantity + price_cents + name...
+              const id = it.cart_item_id;
 
-                <Controls>
-                  <Qty>
-                    <QtyBtn type="button" onClick={() => setQty(it.id, it.quantity - 1)}>
-                      −
-                    </QtyBtn>
-                    <QtyVal>{it.quantity}</QtyVal>
-                    <QtyBtn type="button" onClick={() => setQty(it.id, it.quantity + 1)}>
-                      +
-                    </QtyBtn>
-                  </Qty>
-
-                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <div style={{ fontWeight: 1000 }}>
-                      {formatPrice(it.price_cents * it.quantity)}
-                    </div>
-                    <Remove type="button" onClick={() => removeItem(it.id)}>
-                      Remove
-                    </Remove>
+              return (
+                <Row key={id}>
+                  <div>
+                    <Name>{it.name}</Name>
+                    <Muted>{formatPrice(it.price_cents)} each</Muted>
                   </div>
-                </Controls>
-              </Row>
-            ))
+
+                  <Controls>
+                    <Qty>
+                      <QtyBtn
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setQty(id, it.quantity - 1)}
+                      >
+                        −
+                      </QtyBtn>
+                      <QtyVal>{it.quantity}</QtyVal>
+                      <QtyBtn
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setQty(id, it.quantity + 1)}
+                      >
+                        +
+                      </QtyBtn>
+                    </Qty>
+
+                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                      <div style={{ fontWeight: 1000 }}>
+                        {formatPrice(Number(it.price_cents) * Number(it.quantity))}
+                      </div>
+                      <Remove
+                        type="button"
+                        disabled={busy}
+                        onClick={() => removeItem(id)}
+                      >
+                        Remove
+                      </Remove>
+                    </div>
+                  </Controls>
+                </Row>
+              );
+            })
           )}
         </List>
 
@@ -226,16 +296,14 @@ export default function CartDrawer() {
 
           <CTA
             type="button"
-            onClick={() => alert("Next step: connect /checkout and /payments")}
-            disabled={items.length === 0}
-            style={{ opacity: items.length === 0 ? 0.6 : 1, cursor: items.length === 0 ? "not-allowed" : "pointer" }}
+            onClick={() => alert("Next step: build /checkout UI and POST /checkout")}
+            disabled={items.length === 0 || busy}
           >
             Checkout
           </CTA>
 
           <Small>
-            Na razie to guest cart (localStorage). Za chwilę podepniemy to pod Twoje endpointy:
-            <b> /cart</b> + <b>/checkout</b>.
+            This cart is stored in a server session (guest cart) and follows you until cookies expire.
           </Small>
         </Foot>
       </Panel>
