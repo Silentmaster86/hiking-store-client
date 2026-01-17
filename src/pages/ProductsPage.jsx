@@ -92,7 +92,6 @@ const Btn = styled.button`
   cursor: pointer;
   &:hover { opacity: 0.92; }
 `;
-const { addItem } = useCart();
 
 function formatPrice(cents) {
   const value = (Number(cents || 0) / 100).toFixed(2);
@@ -100,6 +99,7 @@ function formatPrice(cents) {
 }
 
 export default function ProductsPage() {
+  const { addItem } = useCart();
   const [items, setItems] = useState([]);
   const [status, setStatus] = useState("idle"); // idle | loading | error | done
   const [error, setError] = useState("");
