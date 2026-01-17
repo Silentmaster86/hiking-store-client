@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import styled from "styled-components";
-import Navbar from "../Navbar";
+import Navbar from "./Navbar";
 import CartDrawer from "../ui/CartDrawer";
 
 const Shell = styled.div`
