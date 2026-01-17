@@ -266,8 +266,10 @@ export default function HomePage() {
 
             <Actions>
               <Primary to="/products">Shop products</Primary>
-              <Ghost to="/products">Browse best sellers</Ghost>
+              <Ghost to="/products?sort=popular">Browse best sellers</Ghost>
+              <Ghost to="/#best">See featured</Ghost>
             </Actions>
+
 
             <BadgeRow>
               <Badge>UK delivery</Badge>

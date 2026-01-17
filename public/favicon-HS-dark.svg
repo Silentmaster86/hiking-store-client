@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b1b1b"/>
+      <stop offset="100%" stop-color="#0f0f0f"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff9f1c"/>
+      <stop offset="100%" stop-color="#e76f00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#bg)"/>
+
+  <!-- Mountains -->
+  <path d="M4 18 L11 8 L16 14 L21 7 L28 18 Z" fill="#2f5d50"/>
+
+  <!-- Sun -->
+  <circle cx="23" cy="9" r="2.5" fill="#ffb703"/>
+
+  <!-- HS Letters -->
+  <text x="16" y="25"
+        text-anchor="middle"
+        font-size="10"
+        font-weight="700"
+        font-family="Arial, Helvetica, sans-serif"
+        fill="url(#accent)">
+    HS
+  </text>
+</svg>
