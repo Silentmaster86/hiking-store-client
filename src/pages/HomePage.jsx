@@ -273,7 +273,7 @@ export default function HomePage() {
   useEffect(() => {
     document.title = "Hiking Store — Outdoor gear for UK weekends";
   }, []);
-  
+
 
   return (
     <>
@@ -348,14 +348,14 @@ export default function HomePage() {
         </Cards>
       </Section>
 
-      <Section>
+      <Section id="best">
         <SectionHead>
           <H2>Best sellers</H2>
           <SmallBtn to="/products">See all</SmallBtn>
         </SectionHead>
-
+        
         {status === "error" && <Muted>Couldn’t load products. Check VITE_API_URL.</Muted>}
-
+        
         {status === "loading" && (
           <Grid>
             {[1,2,3].map((n) => (
@@ -372,7 +372,26 @@ export default function HomePage() {
             ))}
           </Grid>
         )}
+      
+        {status === "done" && (
+          <Grid>
+            {best.map((p) => (
+              <ProductCard key={p.id}>
+                <Img />
+                <Body>
+                  <PName>{p.name}</PName>
+                  <PDesc>{p.description}</PDesc>
+                  <PRow>
+                    <Price>{formatPrice(p.price_cents)}</Price>
+                    <SmallBtn to={`/products?highlight=${p.id}`}>Open</SmallBtn>
+                  </PRow>
+                </Body>
+              </ProductCard>
+            ))}
+          </Grid>
+        )}
       </Section>
+
     </>
   );
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { fetchProducts } from "../api/products";
 import { useCart } from "../context/CartContext";
+import { useSearchParams } from "react-router-dom";
+
 
 const Wrap = styled.div`
   max-width: 1100px;
@@ -46,7 +48,11 @@ const Card = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: ${({ theme }) => theme.shadows.soft};
+  box-shadow: ${({ theme, $highlight }) =>
+  $highlight
+    ? `0 0 0 6px rgba(34,197,94,0.14), ${theme.shadows.soft}`
+    : theme.shadows.soft};
+  transition: box-shadow 0.2s ease;
 `;
 
 const Img = styled.div`
@@ -103,6 +109,9 @@ export default function ProductsPage() {
   const [items, setItems] = useState([]);
   const [status, setStatus] = useState("idle"); // idle | loading | error | done
   const [error, setError] = useState("");
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get("highlight");
+
 
   useEffect(() => {
     let mounted = true;
@@ -127,31 +136,35 @@ export default function ProductsPage() {
   useEffect(() => {
     document.title = "Products — Hiking Store";
   }, []);
-
-
+  
   return (
-    <Wrap>
-      <TitleRow>
-        <div>
-          <H1>Shop</H1>
-          <Sub>Outdoor essentials — powered by your Render API</Sub>
-        </div>
-      </TitleRow>
+  <Wrap>
+    <TitleRow>
+      <div>
+        <H1>Shop</H1>
+        <Sub>Outdoor essentials for UK weekends.</Sub>
+      </div>
+    </TitleRow>
 
-      {status === "loading" && <div>Loading products…</div>}
-      {status === "error" && (
-        <div style={{ color: "crimson" }}>
-          {error}
-          <div style={{ marginTop: 8, color: "#666" }}>
-            Tip: sprawdź czy w Netlify masz ustawione <b>VITE_API_URL</b> na Render.
-          </div>
-        </div>
-      )}
+    {status === "loading" && <div>Loading products…</div>}
 
-      {status === "done" && (
-        <Grid>
-          {items.map((p) => (
-            <Card key={p.id}>
+    {status === "error" && (
+      <div style={{ color: "crimson" }}>
+        {error}
+        <div style={{ marginTop: 8, color: "#666" }}>
+          Tip: sprawdź czy w Netlify masz ustawione <b>VITE_API_URL</b> na Render.
+        </div>
+      </div>
+    )}
+
+    {status === "done" && (
+      <Grid>
+        {items.map((p) => {
+          const isHighlighted =
+            highlightId && String(p.id) === String(highlightId);
+
+          return (
+            <Card key={p.id} $highlight={isHighlighted}>
               <Img />
               <Body>
                 <Name>{p.name}</Name>
@@ -162,9 +175,10 @@ export default function ProductsPage() {
                 </Bar>
               </Body>
             </Card>
-          ))}
-        </Grid>
-      )}
-    </Wrap>
+          );
+        })}
+      </Grid>
+    )}
+  </Wrap>
   );
 }
