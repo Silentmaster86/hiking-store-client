@@ -130,18 +130,20 @@ export default function OrdersPage() {
               setStatus("done");
           } catch (e) {
               if (!active) return;
-
+                    
               let msg = e?.message || "Failed to load orders.";
-
-              if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) {
-                  msg = "You must be signed in to view your orders.";
+              const lower = String(msg).toLowerCase();
+                    
+              if (lower.includes("unauthorized") || lower.includes(" 401") || lower.includes("401 ")) {
+                msg = "You must be signed in to view your orders.";
               } else if (msg === "Failed to fetch") {
-                  msg = "Cannot connect to the server. Please try again.";
+                msg = "Cannot connect to the server. Please try again.";
               }
-      
+          
               setError(msg);
               setStatus("error");
-          }
+            }
+
       }
 
     load();
@@ -159,11 +161,11 @@ export default function OrdersPage() {
         {status === "error" && (
           <ErrorBox>
             {error}
-            {error.includes("signed in") && (
-              <div style={{ marginTop: 8, opacity: 0.9 }}>
-                Tip: go to <b>Account</b> and log in, then come back here.
-              </div>
-            )}
+            <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <Link to="/products" style={{ color: "inherit", textDecoration: "underline", fontWeight: 900 }}>
+                Go to Products
+              </Link>
+            </div>
           </ErrorBox>
         )}
 

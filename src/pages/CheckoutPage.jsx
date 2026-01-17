@@ -159,7 +159,10 @@ export default function CheckoutPage() {
       const msg =
         err?.message === "Failed to fetch"
           ? "Cannot connect to the server. Please try again in a moment."
+          : err?.status === 401
+          ? "Your session expired. Please refresh the page and try again."
           : err?.message || "Checkout failed.";
+
       setError(msg);
       setStatus("idle");
     }
@@ -180,48 +183,49 @@ export default function CheckoutPage() {
         )}
 
         <form onSubmit={onSubmit}>
+          <fieldset disabled={status === "submitting"} style={{ border: 0, padding: 0, margin: 0 }}>  
           <Row>
             {error && <ErrorBox>{error}</ErrorBox>}
 
             <Grid>
               <Field>
                 <Label htmlFor="email">Email (required)</Label>
-                <Input id="email" name="email" value={form.email} onChange={onChange} placeholder="you@example.com" />
-              </Field>
-
-              <Field>
-                <Label htmlFor="country">Country</Label>
-                <Input id="country" name="country" value={form.country} onChange={onChange} />
+                <Input id="email" name="email" type="email" required autoComplete="email" value={form.email} onChange={onChange} placeholder="you@example.com" />
               </Field>
 
               <Field>
                 <Label htmlFor="firstName">First name</Label>
-                <Input id="firstName" name="firstName" value={form.firstName} onChange={onChange} />
+                <Input id="firstName" name="firstName" autoComplete="given-name" value={form.firstName} onChange={onChange} />
               </Field>
 
               <Field>
                 <Label htmlFor="lastName">Last name</Label>
-                <Input id="lastName" name="lastName" value={form.lastName} onChange={onChange} />
+                <Input id="lastName" name="lastName" autoComplete="family-name" value={form.lastName} onChange={onChange} />
               </Field>
 
               <Field>
                 <Label htmlFor="address1">Address line 1 (required)</Label>
-                <Input id="address1" name="address1" value={form.address1} onChange={onChange} />
+                <Input id="address1" name="address1" required autoComplete="address-line1" value={form.address1} onChange={onChange} />
               </Field>
 
               <Field>
                 <Label htmlFor="address2">Address line 2</Label>
-                <Input id="address2" name="address2" value={form.address2} onChange={onChange} />
+                <Input id="address2" name="address2" autoComplete="address-line2" value={form.address2} onChange={onChange} />
               </Field>
 
               <Field>
                 <Label htmlFor="city">City (required)</Label>
-                <Input id="city" name="city" value={form.city} onChange={onChange} />
+                <Input id="city" name="city" required autoComplete="address-level2" value={form.city} onChange={onChange} />
               </Field>
 
               <Field>
                 <Label htmlFor="postcode">Postcode (required)</Label>
-                <Input id="postcode" name="postcode" value={form.postcode} onChange={onChange} />
+                <Input id="postcode" name="postcode" autoComplete="postal-code" value={form.postcode} onChange={onChange} />
+              </Field>
+
+              <Field>
+                <Label htmlFor="country">Country</Label>
+                <Input id="country" name="country" autoComplete="country-name" value={form.country} onChange={onChange} />
               </Field>
             </Grid>
 
@@ -233,6 +237,7 @@ export default function CheckoutPage() {
               After placing your order, you’ll see a confirmation screen with order details.
             </Muted>
           </Row>
+          </fieldset>
         </form>
       </Card>
     </Wrap>

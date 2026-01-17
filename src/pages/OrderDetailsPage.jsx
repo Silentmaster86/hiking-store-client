@@ -126,21 +126,18 @@ export default function OrderDetailsPage() {
         setItems(Array.isArray(data?.items) ? data.items : []);
         setStatus("done");
       } catch (e) {
-          if (!active) return;
-            
-          let msg = e?.message || "Failed to load order.";
-            
-          if (msg.includes("401") || msg.toLowerCase().includes("unauthorized")) {
-            msg = "You must be signed in to view this order.";
-          } else if (msg === "Failed to fetch") {
-            msg = "Cannot connect to the server. Please try again.";
-          }
-      
-          setError(msg);
-          setStatus("error");
+        if (!active) return;
+                    let msg = e?.message || "Failed to load order.";
+        const lower = String(msg).toLowerCase();
+                    if (lower.includes("unauthorized") || lower.includes(" 401") || lower.includes("401 ")) {
+          msg = "You must be signed in to view this order.";
+        } else if (msg === "Failed to fetch") {
+          msg = "Cannot connect to the server. Please try again.";
         }
-
-    }
+              setError(msg);
+          setStatus("error");
+        }  
+      }
 
     load();
     return () => {
@@ -156,49 +153,52 @@ export default function OrderDetailsPage() {
       </Top>
 
       <Card>
-        {status === "error" && <ErrorBox>{error}</ErrorBox>}
-        {status === "loading" && <Muted>Loading…</Muted>}
+          {status === "error" && <ErrorBox>{error}</ErrorBox>}
+          {status === "loading" && <Muted>Loading…</Muted>}
 
-        {status === "done" && order && (
-          <>
-            <Row>
-              <Label>Status</Label>
-              <Val>{order.status}</Val>
-            </Row>
-            <Row>
-              <Label>Total</Label>
-              <Val>{formatPrice(order.total_cents)}</Val>
-            </Row>
-            <Row>
-              <Label>Created</Label>
-              <Val>{formatDateTime(order.created_at)}</Val>
-            </Row>
+          {status === "done" && !order && <Muted>Order not found.</Muted>}
 
-            <Table>
-              <Muted style={{ marginTop: 10, marginBottom: 6, fontWeight: 900 }}>
-                Items
-              </Muted>
-
-              {items.map((it, idx) => (
-                <Line key={`${it.product_id}-${idx}`}>
-                  <div>
-                    <div style={{ fontWeight: 1000 }}>{it.name}</div>
-                    <Muted>Product ID: {it.product_id}</Muted>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: 1000 }}>{formatPrice(it.price_cents)}</div>
-                    <Muted>each</Muted>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: 1000 }}>x{it.quantity}</div>
-                    <Muted>{formatPrice(it.line_total_cents)}</Muted>
-                  </div>
-                </Line>
-              ))}
-            </Table>
-          </>
-        )}
+          {status === "done" && order && (
+            <>
+              <Row>
+                <Label>Status</Label>
+                <Val>{order.status}</Val>
+              </Row>
+              <Row>
+                <Label>Total</Label>
+                <Val>{formatPrice(order.total_cents)}</Val>
+              </Row>
+              <Row>
+                <Label>Created</Label>
+                <Val>{formatDateTime(order.created_at)}</Val>
+              </Row>
+            
+              <Table>
+                <Muted style={{ marginTop: 10, marginBottom: 6, fontWeight: 900 }}>
+                  Items
+                </Muted>
+            
+                {items.map((it, idx) => (
+                  <Line key={`${it.product_id}-${idx}`}>
+                    <div>
+                      <div style={{ fontWeight: 1000 }}>{it.name}</div>
+                      <Muted>Product ID: {it.product_id}</Muted>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontWeight: 1000 }}>{formatPrice(it.price_cents)}</div>
+                      <Muted>each</Muted>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontWeight: 1000 }}>x{it.quantity}</div>
+                      <Muted>{formatPrice(it.line_total_cents)}</Muted>
+                    </div>
+                  </Line>
+                ))}
+              </Table>
+            </>
+          )}
       </Card>
+
     </Wrap>
   );
 }

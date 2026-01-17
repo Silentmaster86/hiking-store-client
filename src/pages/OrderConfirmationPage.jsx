@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
 import styled from "styled-components";
+import { getOrderById } from "../api/orders";
 
 const Wrap = styled.div`
   max-width: 760px;
@@ -33,6 +34,10 @@ const Row = styled.div`
   gap: 12px;
   padding: 10px 0;
   border-top: 1px solid ${({ theme }) => theme.colors.border};
+  &:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
 `;
 
 const Label = styled.div`
@@ -48,7 +53,7 @@ const Btn = styled(Link)`
   display: inline-flex;
   margin-top: 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   color: ${({ theme }) => theme.colors.text};
   border-radius: 14px;
   padding: 10px 12px;
@@ -57,20 +62,75 @@ const Btn = styled(Link)`
   &:hover { background: rgba(255,255,255,0.06); }
 `;
 
+const ErrorBox = styled.div`
+  margin-top: 10px;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  background: rgba(220, 38, 38, 0.08);
+  color: rgba(220, 38, 38, 0.95);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 800;
+`;
+
 function formatPrice(cents) {
   const v = (Number(cents || 0) / 100).toFixed(2);
   return `£${v}`;
+}
+
+function pickTotalCents(order) {
+  return (
+    order?.total_cents ??
+    order?.totalCents ??
+    order?.totalCentsAmount ??
+    order?.total ??
+    0
+  );
 }
 
 export default function OrderConfirmationPage() {
   const { id } = useParams();
   const location = useLocation();
 
-  const order = useMemo(() => location.state?.order || null, [location.state]);
+  const [order, setOrder] = useState(location.state?.order || null);
+  const [status, setStatus] = useState(order ? "ready" : "loading"); // loading | ready | error
+  const [error, setError] = useState("");
 
   useEffect(() => {
     document.title = `Order #${id} — Confirmation`;
   }, [id]);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function load() {
+      if (order) return; // mamy z navigate state
+      setStatus("loading");
+      setError("");
+
+      try {
+        const data = await getOrderById(id);
+        // backend może zwrócić { order: {...} } albo bezpośrednio {...}
+        const fetched = data?.order ?? data;
+
+        if (!alive) return;
+        setOrder(fetched || null);
+        setStatus("ready");
+      } catch (e) {
+        if (!alive) return;
+        const msg =
+          e?.message === "Failed to fetch"
+            ? "Cannot connect to the server. Please try again in a moment."
+            : e?.message || "Cannot load order.";
+        setError(msg);
+        setStatus("error");
+      }
+    }
+
+    load();
+    return () => { alive = false; };
+  }, [id, order]);
+
+  const totalCents = pickTotalCents(order);
 
   return (
     <Wrap>
@@ -78,22 +138,29 @@ export default function OrderConfirmationPage() {
       <Muted>Thanks! Your order has been placed.</Muted>
 
       <Card>
-        <Row>
-          <Label>Order ID</Label>
-          <Val>#{id}</Val>
-        </Row>
+        {status === "loading" && <Muted>Loading order…</Muted>}
+        {status === "error" && <ErrorBox>{error}</ErrorBox>}
 
-        <Row>
-          <Label>Status</Label>
-          <Val>{order?.status || "pending"}</Val>
-        </Row>
+        {status === "ready" && (
+          <>
+            <Row>
+              <Label>Order ID</Label>
+              <Val>#{order?.id ?? id}</Val>
+            </Row>
 
-        <Row>
-          <Label>Total</Label>
-          <Val>{formatPrice(order?.total_cents)}</Val>
-        </Row>
+            <Row>
+              <Label>Status</Label>
+              <Val>{order?.status || "pending"}</Val>
+            </Row>
 
-        <Btn to="/products">Continue shopping</Btn>
+            <Row>
+              <Label>Total</Label>
+              <Val>{formatPrice(totalCents)}</Val>
+            </Row>
+
+            <Btn to="/products">Continue shopping</Btn>
+          </>
+        )}
       </Card>
     </Wrap>
   );
