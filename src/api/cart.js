@@ -1,4 +1,3 @@
-// src/api/cart.js
 import { apiRequest } from "./http";
 
 // GET /cart -> { cartId, items: [...] }

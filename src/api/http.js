@@ -1,4 +1,3 @@
-// src/api/http.js
 const API_URL = import.meta.env.VITE_API_URL;
 
 if (!API_URL) {
@@ -27,6 +26,11 @@ export async function apiRequest(path, options = {}) {
 
   if (!res.ok) {
     const data = await parseResponse(res);
+
+    if (res.status === 401) {
+      throw new Error("Unauthorized");
+    }
+
     const msg =
       (data && (data.error || data.message)) ||
       `${options.method || "GET"} ${path} failed: ${res.status}`;

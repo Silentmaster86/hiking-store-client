@@ -1,4 +1,3 @@
-// src/api/checkout.js
 import { apiRequest } from "./http";
 
 export function createCheckout(payload) {

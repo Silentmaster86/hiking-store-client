@@ -4,6 +4,8 @@ import HomePage from "../pages/HomePage";
 import ProductsPage from "../pages/ProductsPage";
 import CheckoutPage from "../pages/CheckoutPage";
 import OrderConfirmationPage from "../pages/OrderConfirmationPage";
+import OrdersPage from "../pages/OrdersPage";
+import OrderDetailsPage from "../pages/OrderDetailsPage";
 
 export default function App() {
   return (
@@ -13,6 +15,8 @@ export default function App() {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id/confirmation" element={<OrderConfirmationPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/orders/:id" element={<OrderDetailsPage />} />
       </Route>
     </Routes>
   );
