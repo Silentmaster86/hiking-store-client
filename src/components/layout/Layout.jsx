@@ -1,23 +1,24 @@
+import { Outlet } from "react-router-dom";
 import styled from "styled-components";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
+import Navbar from "../components/Navbar";
 
 const Shell = styled.div`
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 `;
 
 const Main = styled.main`
-  flex: 1;
+  max-width: ${({ theme }) => theme.container.max};
+  margin: 0 auto;
+  padding: 24px ${({ theme }) => theme.container.pad};
 `;
 
-export default function Layout({ children }) {
+export default function Layout() {
   return (
     <Shell>
       <Navbar />
-      <Main>{children}</Main>
-      <Footer />
+      <Main>
+        <Outlet />
+      </Main>
     </Shell>
   );
 }
