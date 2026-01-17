@@ -5,14 +5,17 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./app/App.jsx";
 import GlobalStyles from "./styles/GlobalStyles.js";
 import theme from "./styles/theme.js";
+import { CartProvider } from "./context/CartContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </CartProvider>
     </ThemeProvider>
   </React.StrictMode>
 );
