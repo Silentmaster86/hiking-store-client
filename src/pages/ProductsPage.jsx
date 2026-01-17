@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { fetchProducts } from "../api/products";
+import { useCart } from "../context/CartContext";
 
 const Wrap = styled.div`
   max-width: 1100px;
@@ -91,6 +92,7 @@ const Btn = styled.button`
   cursor: pointer;
   &:hover { opacity: 0.92; }
 `;
+const { addItem } = useCart();
 
 function formatPrice(cents) {
   const value = (Number(cents || 0) / 100).toFixed(2);
