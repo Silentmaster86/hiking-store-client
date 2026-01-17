@@ -2,7 +2,6 @@ import { Outlet } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "./Navbar";
 import CartDrawer from "../ui/CartDrawer";
-//import { useCart } from "../../context/CartContext.jsx";
 
 const Shell = styled.div`
   min-height: 100vh;
@@ -15,8 +14,6 @@ const Main = styled.main`
 `;
 
 export default function Layout() {
- // const cart = useCart();
- // console.log("CART OK", cart);
   return (
     <Shell>
       <Navbar />
