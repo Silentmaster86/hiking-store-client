@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useCart } from "../../context/CartContext";
+import { useCart } from "../../context/CartContext.jsx";
 
 const Overlay = styled.div`
   position: fixed;
