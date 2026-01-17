@@ -1,4 +1,4 @@
-export const theme = {
+const theme = {
   colors: {
     bg: "#0b0f14",
     surface: "#0f1620",
@@ -6,8 +6,8 @@ export const theme = {
     text: "#e8eef6",
     muted: "#a7b3c2",
     border: "rgba(255,255,255,0.10)",
-    primary: "#2dd4bf",      // teal
-    primary2: "#22c55e",     // green
+    primary: "#2dd4bf",
+    primary2: "#22c55e",
     danger: "#ef4444",
     warning: "#f59e0b",
   },
@@ -16,7 +16,7 @@ export const theme = {
     md: "14px",
     lg: "18px",
   },
-  shadow: {
+  shadows: {
     soft: "0 10px 30px rgba(0,0,0,0.35)",
   },
   container: {
@@ -24,3 +24,5 @@ export const theme = {
     pad: "16px",
   },
 };
+
+export default theme;
