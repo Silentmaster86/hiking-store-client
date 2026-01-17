@@ -2,6 +2,8 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import HomePage from "../pages/HomePage";
 import ProductsPage from "../pages/ProductsPage";
+import CheckoutPage from "../pages/CheckoutPage";
+import OrderConfirmationPage from "../pages/OrderConfirmationPage";
 
 export default function App() {
   return (
@@ -9,6 +11,8 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order/:id/confirmation" element={<OrderConfirmationPage />} />
       </Route>
     </Routes>
   );

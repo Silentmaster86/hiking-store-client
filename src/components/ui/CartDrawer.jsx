@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useCart } from "../../context/CartContext.jsx";
+
 
 const Overlay = styled.div`
   position: fixed;
@@ -192,7 +194,7 @@ function formatPrice(cents) {
 
 export default function CartDrawer() {
   const { open, closeCart, items, status, error, refresh, setQty, removeItem, totalCents } = useCart();
-
+  const nav = useNavigate();
   useEffect(() => {
     if (open) refresh?.();
   }, [open, refresh]);
@@ -264,8 +266,7 @@ export default function CartDrawer() {
           </TotalRow>
 
           <CTA
-            type="button"
-            onClick={() => alert("Next step: build /checkout UI and POST /checkout")}
+            type="button" onClick={() => nav("/checkout")}
             disabled={items.length === 0 || busy}
           >
             Checkout
