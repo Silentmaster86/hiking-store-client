@@ -53,7 +53,7 @@ const Btn = styled(Link)`
   display: inline-flex;
   margin-top: 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255,255,255,0.03);
   color: ${({ theme }) => theme.colors.text};
   border-radius: 14px;
   padding: 10px 12px;
@@ -77,17 +77,8 @@ function formatPrice(cents) {
   return `£${v}`;
 }
 
-function pickTotalCents(order) {
-  return (
-    order?.total_cents ??
-    order?.totalCents ??
-    order?.totalCentsAmount ??
-    order?.total ??
-    0
-  );
-}
-
 export default function OrderConfirmationPage() {
+  console.log("CONFIRMATION PAGE mounted, orderId:", id);
   const { id } = useParams();
   const location = useLocation();
 
@@ -103,25 +94,27 @@ export default function OrderConfirmationPage() {
     let alive = true;
 
     async function load() {
-      if (order) return; // mamy z navigate state
+      if (order) return;
+
       setStatus("loading");
       setError("");
 
       try {
+        console.log("Fetching order:", id);
         const data = await getOrderById(id);
-        // backend może zwrócić { order: {...} } albo bezpośrednio {...}
+        console.log("Order response:", data);
         const fetched = data?.order ?? data;
 
         if (!alive) return;
-        setOrder(fetched || null);
+        setOrder(fetched);
         setStatus("ready");
-      } catch (e) {
+      } catch (err) {
         if (!alive) return;
-        const msg =
-          e?.message === "Failed to fetch"
-            ? "Cannot connect to the server. Please try again in a moment."
-            : e?.message || "Cannot load order.";
-        setError(msg);
+        setError(
+          err?.message === "Failed to fetch"
+            ? "Cannot connect to the server. Please try again."
+            : err?.message || "Cannot load order."
+        );
         setStatus("error");
       }
     }
@@ -129,8 +122,6 @@ export default function OrderConfirmationPage() {
     load();
     return () => { alive = false; };
   }, [id, order]);
-
-  const totalCents = pickTotalCents(order);
 
   return (
     <Wrap>
@@ -141,23 +132,24 @@ export default function OrderConfirmationPage() {
         {status === "loading" && <Muted>Loading order…</Muted>}
         {status === "error" && <ErrorBox>{error}</ErrorBox>}
 
-        {status === "ready" && (
+        {status === "ready" && order && (
           <>
             <Row>
               <Label>Order ID</Label>
-              <Val>#{order?.id ?? id}</Val>
+              <Val>#{order.id}</Val>
             </Row>
 
             <Row>
               <Label>Status</Label>
-              <Val>{order?.status || "pending"}</Val>
+              <Val>{order.status}</Val>
             </Row>
 
             <Row>
               <Label>Total</Label>
-              <Val>{formatPrice(totalCents)}</Val>
+              <Val>{formatPrice(order.total_cents)}</Val>
             </Row>
 
+            <Btn to={`/orders/${order.id}`}>View order details</Btn>
             <Btn to="/products">Continue shopping</Btn>
           </>
         )}
