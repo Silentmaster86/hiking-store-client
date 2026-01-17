@@ -230,6 +230,23 @@ const SmallBtn = styled(Link)`
   &:hover { background: rgba(255,255,255,0.06); }
 `;
 
+const SkeletonCard = styled(ProductCard)`
+  min-height: 240px;
+`;
+
+const SkeletonBar = styled.div`
+  height: 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const SkeletonBlock = styled.div`
+  height: 160px;
+  background: rgba(255,255,255,0.04);
+`;
+
+
 function formatPrice(cents) {
   const v = (Number(cents || 0) / 100).toFixed(2);
   return `£${v}`;
@@ -260,9 +277,10 @@ export default function HomePage() {
           <div>
             <H1>Outdoor gear for real weekends.</H1>
             <Lead>
-              Lightweight packs, durable essentials and trail-ready kit — powered by your Render API.
-              Minimal, clean UI in styled-components.
+              Lightweight packs, durable essentials and trail-ready kit — made for UK weather.
+              Clean design, fast browsing, and a smooth cart experience.
             </Lead>
+
 
             <Actions>
               <Primary to="/products">Shop products</Primary>
@@ -331,23 +349,22 @@ export default function HomePage() {
           <SmallBtn to="/products">See all</SmallBtn>
         </SectionHead>
 
-        {status === "loading" && <Muted>Loading products…</Muted>}
+        {/*{status === "loading" && <Muted>Loading products…</Muted>}*/}
         {status === "error" && <Muted>Couldn’t load products. Check VITE_API_URL.</Muted>}
 
-        {status === "done" && (
+        {status === "loading" && (
           <Grid>
-            {best.map((p) => (
-              <ProductCard key={p.id}>
-                <Img />
+            {[1,2,3].map((n) => (
+              <SkeletonCard key={n}>
+                <SkeletonBlock />
                 <Body>
-                  <PName>{p.name}</PName>
-                  <PDesc>{p.description}</PDesc>
-                  <PRow>
-                    <Price>{formatPrice(p.price_cents)}</Price>
-                    <SmallBtn to="/products">Open</SmallBtn>
-                  </PRow>
+                  <SkeletonBar style={{ width: "70%" }} />
+                  <div style={{ height: 10 }} />
+                  <SkeletonBar style={{ width: "90%" }} />
+                  <div style={{ height: 10 }} />
+                  <SkeletonBar style={{ width: "50%" }} />
                 </Body>
-              </ProductCard>
+              </SkeletonCard>
             ))}
           </Grid>
         )}
