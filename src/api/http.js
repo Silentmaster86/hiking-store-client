@@ -17,7 +17,7 @@ async function parseResponse(res) {
 
 export async function apiRequest(path, options = {}) {
   const res = await fetch(`${API_URL}${path}`, {
-    credentials: "include", // <-- KLUCZ dla session cart
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
   });

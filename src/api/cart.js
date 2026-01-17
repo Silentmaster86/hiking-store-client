@@ -1,12 +1,9 @@
-// src/api/cart.js
 import { apiRequest } from "./http";
 
-// GET /cart
 export function getCart() {
   return apiRequest("/cart", { method: "GET" });
 }
 
-// POST /cart/items  { productId, quantity }
 export function addCartItem(productId, quantity = 1) {
   return apiRequest("/cart/items", {
     method: "POST",
@@ -14,7 +11,6 @@ export function addCartItem(productId, quantity = 1) {
   });
 }
 
-// PATCH /cart/items/:id  { quantity }
 export function updateCartItem(cartItemId, quantity) {
   return apiRequest(`/cart/items/${cartItemId}`, {
     method: "PATCH",
@@ -22,9 +18,6 @@ export function updateCartItem(cartItemId, quantity) {
   });
 }
 
-// DELETE /cart/items/:id
 export function removeCartItem(cartItemId) {
-  return apiRequest(`/cart/items/${cartItemId}`, {
-    method: "DELETE",
-  });
+  return apiRequest(`/cart/items/${cartItemId}`, { method: "DELETE" });
 }
