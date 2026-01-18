@@ -120,7 +120,6 @@ export default function Navbar() {
         <Nav>
           <LinkPill to="/" end>Home</LinkPill>
           <LinkPill to="/products">Products</LinkPill>
-          <LinkPill to="/orders">Orders</LinkPill>
 
 
           {/* ✅ widoczne tylko jak zalogowany */}
