@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
 const Hero = styled.section`
@@ -68,6 +69,7 @@ const Tile = styled(Link)`
 `;
 
 export default function HomePage() {
+  const { user, status } = useAuth();
   return (
     <>
       <Hero>
@@ -79,7 +81,9 @@ export default function HomePage() {
 
         <Actions>
           <Primary to="/products">Shop products</Primary>
-          <Ghost to="/login">Sign in</Ghost>
+          {status !== "loading" && !user && (
+            <Ghost to="/login">Sign in</Ghost>
+          )}
         </Actions>
 
         <Grid>

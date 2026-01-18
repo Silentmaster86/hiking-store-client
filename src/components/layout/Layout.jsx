@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import bg from "../../assets/bg/green.JPG";
+import bg from "../../assets/bg/three_peak.JPG";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import CartDrawer from "../ui/CartDrawer";
