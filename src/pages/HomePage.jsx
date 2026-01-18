@@ -1,357 +1,93 @@
-import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { fetchProducts } from "../api/products";
 
 const Hero = styled.section`
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: linear-gradient(120deg, rgba(34,197,94,0.14), rgba(45,212,191,0.10), rgba(255,255,255,0.02));
-  border-radius: 20px;
-  padding: 28px;
+  background: ${({ theme }) => theme.colors.surface};
+  border-radius: 22px;
+  padding: 22px;
   box-shadow: ${({ theme }) => theme.shadows.soft};
-  overflow: hidden;
 `;
 
-const HeroGrid = styled.div`
-  display: grid;
-  gap: 18px;
-  grid-template-columns: 1fr;
-
-  @media (min-width: 920px) {
-    grid-template-columns: 1.2fr 0.8fr;
-    align-items: center;
-  }
-`;
-
-const H1 = styled.h1`
-  margin: 0;
-  font-size: 38px;
-  letter-spacing: -0.9px;
-
-  @media (min-width: 920px) {
-    font-size: 44px;
-  }
+const Title = styled.h1`
+  margin: 0 0 8px;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -1px;
 `;
 
 const Lead = styled.p`
-  margin: 10px 0 18px;
+  margin: 0 0 16px;
   color: ${({ theme }) => theme.colors.muted};
-  line-height: 1.55;
-  max-width: 58ch;
+  max-width: 60ch;
+  line-height: 1.5;
 `;
 
 const Actions = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 `;
 
 const Primary = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-weight: 900;
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  text-decoration: none;
   background: ${({ theme }) => theme.colors.primary};
-  color: #03130f;
-  &:hover { opacity: 0.92; }
+  color: #04120b;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 1000;
+  border: 1px solid rgba(0,0,0,0.2);
 `;
 
 const Ghost = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-weight: 900;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  text-decoration: none;
+  background: rgba(255,255,255,0.04);
   color: ${({ theme }) => theme.colors.text};
-  &:hover { background: rgba(255,255,255,0.06); }
-`;
-
-const BadgeRow = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-`;
-
-const Badge = styled.div`
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(0,0,0,0.12);
-  color: ${({ theme }) => theme.colors.muted};
-  font-weight: 800;
-  font-size: 13px;
-`;
-
-const Section = styled.section`
-  margin-top: 18px;
-`;
-
-const SectionHead = styled.div`
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 22px 0 12px;
-`;
-
-const H2 = styled.h2`
-  margin: 0;
-  font-size: 18px;
-  letter-spacing: -0.2px;
-`;
-
-const Muted = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
-const Cards = styled.div`
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-
-  @media (min-width: 760px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-`;
-
-const InfoCard = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.surface};
-  border-radius: 18px;
-  padding: 14px;
-`;
-
-const InfoTitle = styled.div`
+  border-radius: 14px;
+  padding: 12px 14px;
   font-weight: 1000;
-  margin-bottom: 6px;
-`;
-
-const InfoText = styled.div`
-  color: ${({ theme }) => theme.colors.muted};
-  line-height: 1.45;
-  font-size: 14px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
 const Grid = styled.div`
+  margin-top: 14px;
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-
-  @media (min-width: 760px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
 `;
 
-const ProductCard = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
+const Tile = styled(Link)`
+  text-decoration: none;
   border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surface2};
   border-radius: 18px;
-  overflow: hidden;
-  box-shadow: ${({ theme }) => theme.shadows.soft};
-`;
+  padding: 14px;
+  color: ${({ theme }) => theme.colors.text};
 
-const Img = styled.div`
-  height: 160px;
-  background: linear-gradient(120deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-`;
-
-const Body = styled.div`
-  padding: 12px 14px 14px;
-`;
-
-const PName = styled.div`
-  font-weight: 1000;
-  margin-bottom: 6px;
-`;
-
-const PDesc = styled.div`
-  color: ${({ theme }) => theme.colors.muted};
-  font-size: 13px;
-  line-height: 1.4;
-  min-height: 36px;
-  margin-bottom: 10px;
-`;
-
-const PRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-`;
-
-const Price = styled.div`
-  font-weight: 1000;
-`;
-
-const SmallBtn = styled(Link)`
-  padding: 9px 10px;
-  border-radius: 12px;
-  font-weight: 900;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
   &:hover { background: rgba(255,255,255,0.06); }
 `;
 
-const SkeletonCard = styled(ProductCard)`
-  min-height: 240px;
-`;
-
-const SkeletonBar = styled.div`
-  height: 12px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid ${({ theme }) => theme.colors.border};
-`;
-
-const SkeletonBlock = styled.div`
-  height: 160px;
-  background: rgba(255,255,255,0.04);
-`;
-
-
-function formatPrice(cents) {
-  const v = (Number(cents || 0) / 100).toFixed(2);
-  return `£${v}`;
-}
-
 export default function HomePage() {
-  const [best, setBest] = useState([]);
-  const [status, setStatus] = useState("idle");
-
-  useEffect(() => {
-    let mounted = true;
-    setStatus("loading");
-    fetchProducts()
-      .then((data) => {
-        if (!mounted) return;
-        const arr = Array.isArray(data) ? data : [];
-        setBest(arr.slice(0, 3));
-        setStatus("done");
-      })
-      .catch(() => mounted && setStatus("error"));
-    return () => (mounted = false);
-  }, []);
-
-  useEffect(() => {
-    document.title = "Hiking Store — Outdoor gear for UK weekends";
-  }, []);
-
-
   return (
     <>
       <Hero>
-        <HeroGrid>
-          <div>
-            <H1>Outdoor gear for real weekends.</H1>
-            <Lead>
-              Lightweight packs, durable essentials and trail-ready kit — made for UK weather.
-              Clean design, fast browsing, and a smooth cart experience.
-            </Lead>
+        <Title>Gear up for the trail.</Title>
+        <Lead>
+          Outdoor essentials for hiking in the UK — jackets, packs, accessories.
+          Fast checkout, clean UI, real API + sessions.
+        </Lead>
 
+        <Actions>
+          <Primary to="/products">Shop products</Primary>
+          <Ghost to="/login">Sign in</Ghost>
+        </Actions>
 
-            <Actions>
-              <Primary to="/products">Shop products</Primary>
-              <Ghost to="/products?sort=popular">Browse best sellers</Ghost>
-              <Ghost to="/#best">See featured</Ghost>
-            </Actions>
-
-
-            <BadgeRow>
-              <Badge>UK delivery</Badge>
-              <Badge>Secure checkout</Badge>
-              <Badge>Built with PERN</Badge>
-            </BadgeRow>
-          </div>
-        </HeroGrid>
+        <Grid>
+          <Tile to="/products">🥾 Footwear & Accessories</Tile>
+          <Tile to="/products">🧥 Jackets & Layers</Tile>
+          <Tile to="/products">🎒 Bags & Essentials</Tile>
+        </Grid>
       </Hero>
-
-
-      <Section>
-        <SectionHead>
-          <H2>Why Hiking Store?</H2>
-          <Muted>Built for real outdoor use.</Muted>
-        </SectionHead>
-        
-        <Cards>
-          <InfoCard>
-            <InfoTitle>Outdoor-first design</InfoTitle>
-            <InfoText>
-              Clear layout, strong contrast and easy browsing — even on mobile and in bright daylight.
-            </InfoText>
-          </InfoCard>
-        
-          <InfoCard>
-            <InfoTitle>Guest checkout</InfoTitle>
-            <InfoText>
-              Buy without creating an account. Register later if you want to track orders.
-            </InfoText>
-          </InfoCard>
-        
-          <InfoCard>
-            <InfoTitle>Ready for UK weekends</InfoTitle>
-            <InfoText>
-              Practical gear for short hikes, quick escapes and unpredictable weather.
-            </InfoText>
-          </InfoCard>
-        </Cards>
-      </Section>
-
-
-      <Section id="best">
-        <SectionHead>
-          <H2>Best sellers</H2>
-          <SmallBtn to="/products">See all</SmallBtn>
-        </SectionHead>
-        
-        {status === "error" && <Muted>Couldn’t load products. Check VITE_API_URL.</Muted>}
-        
-        {status === "loading" && (
-          <Grid>
-            {[1,2,3].map((n) => (
-              <SkeletonCard key={n}>
-                <SkeletonBlock />
-                <Body>
-                  <SkeletonBar style={{ width: "70%" }} />
-                  <div style={{ height: 10 }} />
-                  <SkeletonBar style={{ width: "90%" }} />
-                  <div style={{ height: 10 }} />
-                  <SkeletonBar style={{ width: "50%" }} />
-                </Body>
-              </SkeletonCard>
-            ))}
-          </Grid>
-        )}
-      
-        {status === "done" && (
-          <Grid>
-            {best.map((p) => (
-              <ProductCard key={p.id}>
-                <Img />
-                <Body>
-                  <PName>{p.name}</PName>
-                  <PDesc>{p.description}</PDesc>
-                  <PRow>
-                    <Price>{formatPrice(p.price_cents)}</Price>
-                    <SmallBtn to={`/products?highlight=${p.id}`}>Open</SmallBtn>
-                  </PRow>
-                </Body>
-              </ProductCard>
-            ))}
-          </Grid>
-        )}
-      </Section>
-
     </>
   );
 }

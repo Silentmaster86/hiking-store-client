@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import bg from "../../assets/bg/three_peak.JPG";
+import bg from "../../assets/bg/green.JPG";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import CartDrawer from "../ui/CartDrawer";
@@ -10,44 +10,52 @@ const Shell = styled.div`
   position: relative;
   overflow: hidden;
 
-  /* Background Image */
+  /* background image */
   &::before {
     content: "";
-    position: ;
-    inset: 0;
+    position: absolute;
+    inset: 10px;
     background-image:
       linear-gradient(
-        rgba(6, 10, 14, 0.78),
-        rgba(6, 10, 14, 0.92)
-        ),
-        url(${bg});
+        rgba(6, 10, 14, 0.56),
+        rgba(6, 10, 14, 0.51)
+      ),
+      url(${bg});
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    transform: scale(1.02); 
-    opacity: 0.8;
-    z-index: -1;
-   }
+    transform: scale(1.02);
+    z-index: 0;
+  }
+`;
+
+const Content = styled.div`
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Main = styled.main`
   max-width: ${({ theme }) => theme.container.max};
   margin: 0 auto;
   padding: 26px ${({ theme }) => theme.container.pad};
-  flex: 1;
   width: 100%;
+  flex: 1; /* <- ważne, żeby footer był na dole */
 `;
 
 export default function Layout() {
   return (
     <Shell>
-      <Navbar />
-      <Main>
-        <Outlet />
-      </Main>
-
-      <Footer />
-      <CartDrawer />
+      <Content>
+        <Navbar />
+        <Main>
+          <Outlet />
+        </Main>
+        <Footer />
+        <CartDrawer />
+      </Content>
     </Shell>
   );
 }
