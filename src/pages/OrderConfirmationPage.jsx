@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
 import styled from "styled-components";
 import { getOrderById } from "../api/orders";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Wrap = styled.div`
   max-width: 760px;
@@ -81,6 +82,7 @@ export default function OrderConfirmationPage() {
   const { id } = useParams();
 
   const location = useLocation();
+  const { user } = useAuth();
   const [order, setOrder] = useState(location.state?.order || null);
   const [status, setStatus] = useState(order ? "ready" : "loading"); // loading | ready | error
   const [error, setError] = useState("");
@@ -146,8 +148,13 @@ export default function OrderConfirmationPage() {
               <Val>{formatPrice(order.total_cents)}</Val>
             </Row>
 
+            {user ? (
+              <Btn to={`/orders/${order.id}`}>View full order details</Btn>
+            ) : (
             <Btn to={`/orders/${order.id}`}>Sign in to view full order details</Btn>
-            <Btn to="/products">Continue shopping</Btn>
+            )}
+
+            <Btn to="/products">Continue shopping</Btn>  
           </>
         )}
       </Card>

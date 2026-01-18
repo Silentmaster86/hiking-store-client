@@ -266,11 +266,16 @@ export default function CartDrawer() {
           </TotalRow>
 
           <CTA
-            type="button" onClick={() => nav("/checkout")}
+            type="button"
+            onClick={() => {
+              closeCart();
+              nav("/checkout");
+            }}
             disabled={items.length === 0 || busy}
           >
             Checkout
           </CTA>
+
 
           <Small>This cart is stored in a server session (guest cart).</Small>
         </Foot>

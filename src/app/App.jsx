@@ -18,8 +18,6 @@ export default function App() {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id/confirmation" element={<OrderConfirmationPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/orders/:id" element={<OrderDetailsPage />} />
 
         {/* Auth routes */}
         <Route path="/login" element={<LoginPage />} />
