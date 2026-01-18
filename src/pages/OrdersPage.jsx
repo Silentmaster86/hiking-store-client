@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { getOrders } from "../api/orders";
@@ -38,13 +38,13 @@ const Row = styled(Link)`
   border-top: 1px solid ${({ theme }) => theme.colors.border};
 
   &:hover {
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
   }
 `;
 
 const Left = styled.div`
   display: grid;
-  gap: 4px;
+  gap: 6px;
 `;
 
 const Right = styled.div`
@@ -71,9 +71,23 @@ const Badge = styled.span`
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   color: ${({ theme }) => theme.colors.muted};
   width: fit-content;
+`;
+
+const Dot = styled.span`
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: ${({ $tone }) => {
+    if ($tone === "success") return "rgba(34,197,94,0.95)"; // green
+    if ($tone === "info") return "rgba(59,130,246,0.95)"; // blue
+    if ($tone === "warn") return "rgba(245,158,11,0.95)"; // amber
+    if ($tone === "purple") return "rgba(168,85,247,0.95)"; // purple
+    if ($tone === "danger") return "rgba(220,38,38,0.95)"; // red
+    return "rgba(148,163,184,0.9)"; // gray
+  }};
 `;
 
 const ErrorBox = styled.div`
@@ -100,12 +114,26 @@ function formatDate(iso) {
   }
 }
 
-function prettyStatus(s) {
-  const v = String(s || "").toLowerCase();
-  if (v === "paid") return "Paid";
-  if (v === "pending") return "Pending";
-  if (v === "cancelled") return "Cancelled";
-  return s || "-";
+function statusMeta(status) {
+  const s = String(status || "pending").toLowerCase();
+
+  if (s === "delivered") return { label: "Delivered", tone: "success" };
+  if (s === "shipped") return { label: "Shipped", tone: "purple" };
+  if (s === "paid") return { label: "Paid", tone: "info" };
+  if (s === "pending") return { label: "Pending", tone: "warn" };
+  if (s === "cancelled") return { label: "Cancelled", tone: "danger" };
+
+  return { label: s || "-", tone: "neutral" };
+}
+
+function StatusBadge({ status }) {
+  const m = statusMeta(status);
+  return (
+    <Badge title={`Status: ${m.label}`}>
+      <Dot $tone={m.tone} />
+      {m.label}
+    </Badge>
+  );
 }
 
 export default function OrdersPage() {
@@ -120,37 +148,40 @@ export default function OrdersPage() {
   useEffect(() => {
     let active = true;
 
-      async function load() {
-          setStatus("loading");
-          setError("");
-          try {
-              const data = await getOrders(); // { orders: [...] }
-              if (!active) return;
-              setOrders(Array.isArray(data?.orders) ? data.orders : []);
-              setStatus("done");
-          } catch (e) {
-              if (!active) return;
-                    
-              let msg = e?.message || "Failed to load orders.";
-              const lower = String(msg).toLowerCase();
-                    
-              if (lower.includes("unauthorized") || lower.includes(" 401") || lower.includes("401 ")) {
-                msg = "You must be signed in to view your orders.";
-              } else if (msg === "Failed to fetch") {
-                msg = "Cannot connect to the server. Please try again.";
-              }
-          
-              setError(msg);
-              setStatus("error");
-            }
+    async function load() {
+      setStatus("loading");
+      setError("");
+      try {
+        const data = await getOrders(); // { orders: [...] }
+        if (!active) return;
+        setOrders(Array.isArray(data?.orders) ? data.orders : []);
+        setStatus("done");
+      } catch (e) {
+        if (!active) return;
 
+        let msg = e?.message || "Failed to load orders.";
+        const lower = String(msg).toLowerCase();
+
+        if (lower.includes("unauthorized") || lower.includes(" 401") || lower.includes("401 ")) {
+          msg = "You must be signed in to view your orders.";
+        } else if (msg === "Failed to fetch") {
+          msg = "Cannot connect to the server. Please try again.";
+        }
+
+        setError(msg);
+        setStatus("error");
       }
+    }
 
     load();
     return () => {
       active = false;
     };
   }, []);
+
+  const sortedOrders = useMemo(() => {
+    return [...orders].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }, [orders]);
 
   return (
     <Wrap>
@@ -169,19 +200,16 @@ export default function OrdersPage() {
           </ErrorBox>
         )}
 
-
         {status === "loading" && <Muted>Loading…</Muted>}
 
-        {status === "done" && orders.length === 0 && (
-          <Muted>No orders yet.</Muted>
-        )}
+        {status === "done" && sortedOrders.length === 0 && <Muted>No orders yet.</Muted>}
 
         {status === "done" &&
-          orders.map((o) => (
+          sortedOrders.map((o) => (
             <Row key={o.id} to={`/orders/${o.id}`}>
               <Left>
                 <Title>Order #{o.id}</Title>
-                <Badge>{prettyStatus(o.status)}</Badge>
+                <StatusBadge status={o.status} />
               </Left>
 
               <Right>
