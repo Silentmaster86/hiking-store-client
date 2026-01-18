@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import bg from "../../assets/bg/green.JPG";
+import bg from "../../assets/bg/three_peak.JPG";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import CartDrawer from "../ui/CartDrawer";
@@ -13,7 +13,7 @@ const Shell = styled.div`
   /* Background Image */
   &::before {
     content: "";
-    position: absolute;
+    position: ;
     inset: 0;
     background-image:
       linear-gradient(
@@ -24,8 +24,9 @@ const Shell = styled.div`
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    transform: scale(1.02);
-    z-index: 0;
+    transform: scale(1.02); 
+    opacity: 0.8;
+    z-index: -1;
    }
 `;
 
