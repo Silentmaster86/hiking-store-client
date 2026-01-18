@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useParams } from "react-router-dom";
-import { getOrderById } from "../api/orders";
+import { getOrderById, updateOrderStatus } from "../api/orders";
+import OrderStatusTimeline from "../components/orders/OrderStatusTimeline";
 
 const Wrap = styled.div`
   max-width: 900px;
@@ -28,11 +29,13 @@ const Back = styled(Link)`
   text-decoration: none;
   font-weight: 1000;
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   padding: 10px 12px;
   border-radius: 14px;
 
-  &:hover { background: rgba(255,255,255,0.06); }
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 `;
 
 const Card = styled.div`
@@ -87,6 +90,26 @@ const ErrorBox = styled.div`
   font-weight: 800;
 `;
 
+const GhostBtn = styled.button`
+  margin-top: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: rgba(255, 255, 255, 0.03);
+  color: ${({ theme }) => theme.colors.text};
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 1000;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
 function formatPrice(cents) {
   const v = (Number(cents || 0) / 100).toFixed(2);
   return `£${v}`;
@@ -102,11 +125,20 @@ function formatDateTime(iso) {
   }
 }
 
+const STATUS_FLOW = ["pending", "paid", "shipped", "delivered"];
+
+function nextStatus(current) {
+  const s = String(current || "pending").toLowerCase();
+  const idx = STATUS_FLOW.indexOf(s);
+  if (idx === -1) return "pending";
+  return STATUS_FLOW[Math.min(idx + 1, STATUS_FLOW.length - 1)];
+}
+
 export default function OrderDetailsPage() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [items, setItems] = useState([]);
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState("idle"); // idle | loading | done | error
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -127,23 +159,57 @@ export default function OrderDetailsPage() {
         setStatus("done");
       } catch (e) {
         if (!active) return;
-                    let msg = e?.message || "Failed to load order.";
+
+        let msg = e?.message || "Failed to load order.";
         const lower = String(msg).toLowerCase();
-                    if (lower.includes("unauthorized") || lower.includes(" 401") || lower.includes("401 ")) {
+
+        if (lower.includes("unauthorized") || lower.includes(" 401") || lower.includes("401 ")) {
           msg = "You must be signed in to view this order.";
         } else if (msg === "Failed to fetch") {
           msg = "Cannot connect to the server. Please try again.";
         }
-              setError(msg);
-          setStatus("error");
-        }  
+
+        setError(msg);
+        setStatus("error");
       }
+    }
 
     load();
     return () => {
       active = false;
     };
   }, [id]);
+
+  async function handleAdvanceStatus() {
+    if (!order) return;
+
+    try {
+      setStatus("loading");
+      setError("");
+
+      const newStatus = nextStatus(order.status);
+      const data = await updateOrderStatus(order.id, newStatus);
+
+      // zakładamy backend: { order: { ... } }
+      setOrder(data?.order || order);
+      setStatus("done");
+    } catch (e) {
+      let msg = e?.message || "Could not update status.";
+      const lower = String(msg).toLowerCase();
+
+      if (lower.includes("unauthorized") || lower.includes(" 401") || lower.includes("401 ")) {
+        msg = "You must be signed in to update order status.";
+      } else if (msg === "Failed to fetch") {
+        msg = "Cannot connect to the server. Please try again.";
+      }
+
+      setError(msg);
+      setStatus("error");
+    }
+  }
+
+  const isBusy = status === "loading";
+  const isDelivered = String(order?.status || "").toLowerCase() === "delivered";
 
   return (
     <Wrap>
@@ -153,52 +219,68 @@ export default function OrderDetailsPage() {
       </Top>
 
       <Card>
-          {status === "error" && <ErrorBox>{error}</ErrorBox>}
-          {status === "loading" && <Muted>Loading…</Muted>}
+        {status === "error" && <ErrorBox>{error}</ErrorBox>}
+        {status === "loading" && <Muted>Loading…</Muted>}
 
-          {status === "done" && !order && <Muted>Order not found.</Muted>}
+        {status === "done" && !order && <Muted>Order not found.</Muted>}
 
-          {status === "done" && order && (
-            <>
-              <Row>
-                <Label>Status</Label>
-                <Val>{order.status}</Val>
-              </Row>
-              <Row>
-                <Label>Total</Label>
-                <Val>{formatPrice(order.total_cents)}</Val>
-              </Row>
-              <Row>
-                <Label>Created</Label>
-                <Val>{formatDateTime(order.created_at)}</Val>
-              </Row>
-            
-              <Table>
-                <Muted style={{ marginTop: 10, marginBottom: 6, fontWeight: 900 }}>
-                  Items
-                </Muted>
-            
-                {items.map((it, idx) => (
-                  <Line key={`${it.product_id}-${idx}`}>
-                    <div>
-                      <div style={{ fontWeight: 1000 }}>{it.name}</div>
-                      <Muted>Product ID: {it.product_id}</Muted>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontWeight: 1000 }}>{formatPrice(it.price_cents)}</div>
-                      <Muted>each</Muted>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontWeight: 1000 }}>x{it.quantity}</div>
-                      <Muted>{formatPrice(it.line_total_cents)}</Muted>
-                    </div>
-                  </Line>
-                ))}
-              </Table>
-            </>
-          )}
+        {status === "done" && order && (
+          <>
+            <Row>
+              <Label>Status</Label>
+              <Val>{order.status}</Val>
+            </Row>
+
+            <Row>
+              <Label>Total</Label>
+              <Val>{formatPrice(order.total_cents)}</Val>
+            </Row>
+
+            <Row>
+              <Label>Created</Label>
+              <Val>{formatDateTime(order.created_at)}</Val>
+            </Row>
+
+            {/* ✅ Timeline */}
+            <OrderStatusTimeline status={order.status} />
+
+            {/* ✅ Demo control */}
+            <GhostBtn
+              type="button"
+              onClick={handleAdvanceStatus}
+              disabled={isBusy || isDelivered}
+              title={isDelivered ? "Order already delivered" : "Move to next status"}
+            >
+              {isDelivered ? "Delivered" : isBusy ? "Updating…" : "Advance status"}
+            </GhostBtn>
+
+            <Table>
+              <Muted style={{ marginTop: 10, marginBottom: 6, fontWeight: 900 }}>
+                Items
+              </Muted>
+
+              {items.map((it, idx) => (
+                <Line key={`${it.product_id}-${idx}`}>
+                  <div>
+                    <div style={{ fontWeight: 1000 }}>{it.name}</div>
+                    <Muted>Product ID: {it.product_id}</Muted>
+                  </div>
+
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontWeight: 1000 }}>{formatPrice(it.price_cents)}</div>
+                    <Muted>each</Muted>
+                  </div>
+
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontWeight: 1000 }}>x{it.quantity}</div>
+                    <Muted>{formatPrice(it.line_total_cents)}</Muted>
+                  </div>
+                </Line>
+              ))}
+            </Table>
+          </>
+        )}
       </Card>
-
     </Wrap>
   );
 }

@@ -17,3 +17,12 @@ export function claimOrder(guestToken) {
     body: JSON.stringify({ guestToken }),
   });
 }
+
+// PATCH /orders/:id/status  { status }
+export function updateOrderStatus(orderId, status) {
+  return apiRequest(`/orders/${orderId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
