@@ -1,18 +1,25 @@
 const theme = {
   container: { max: "1100px", pad: "18px" },
-  radius: { xl: "18px", lg: "14px" },
-  shadows: { soft: "0 20px 50px rgba(0,0,0,0.35)" },
+  shadows: {
+    soft: "0 10px 30px rgba(0,0,0,0.35)",
+  },
   colors: {
-    bg: "#070B10",
-    surface: "rgba(12, 18, 26, 0.78)",
-    surface2: "rgba(12, 18, 26, 0.55)",
-    border: "rgba(148,163,184,0.18)",
-    text: "rgba(241,245,249,0.95)",
-    muted: "rgba(148,163,184,0.92)",
-    primary: "#22c55e",     // green
-    primary2: "#16a34a",
-    accent: "#f59e0b",      // amber/orange
-    danger: "#ef4444",
+    text: "rgba(255,255,255,0.92)",
+    muted: "rgba(255,255,255,0.68)",
+    border: "rgba(255,255,255,0.14)",
+
+    /* glass cards */
+    surface: "rgba(15, 23, 42, 0.55)",
+
+    /* ✅ primary bardziej sklepowe */
+    primary: "rgba(255, 153, 0, 0.95)",   // orange
+    primaryText: "#1b1200",
+
+    /* opcjonalne akcenty */
+    success: "rgba(34,197,94,0.95)",
+    info: "rgba(59,130,246,0.95)",
+    warn: "rgba(245,158,11,0.95)",
+    danger: "rgba(220,38,38,0.95)",
   },
 };
 
