@@ -32,7 +32,7 @@ const Actions = styled.div`
 const Primary = styled(Link)`
   text-decoration: none;
   background: ${({ theme }) => theme.colors.primary};
-  color: #04120b;
+  color: ${({ theme }) => theme.colors.primaryText};
   border-radius: 14px;
   padding: 12px 14px;
   font-weight: 1000;
@@ -70,28 +70,30 @@ const Tile = styled(Link)`
 
 export default function HomePage() {
   const { user, status } = useAuth();
+
+  // More reliable auth check than just `!user`
+  const isAuthed = status !== "loading" && Boolean(user?.id || user?.email);
+
   return (
-    <>
-      <Hero>
-        <Title>Gear up for the trail.</Title>
-        <Lead>
-          Outdoor essentials for hiking in the UK — jackets, packs, accessories.
-          Fast checkout, clean UI, real API + sessions.
-        </Lead>
+    <Hero>
+      <Title>Gear up for the trail.</Title>
+      <Lead>
+        Outdoor essentials for hiking in the UK — jackets, packs, accessories.
+        Fast checkout, clean UI, real API + sessions.
+      </Lead>
 
-        <Actions>
-          <Primary to="/products">Shop products</Primary>
-          {status !== "loading" && !user && (
-            <Ghost to="/login">Sign in</Ghost>
-          )}
-        </Actions>
+      <Actions>
+        <Primary to="/products">Shop products</Primary>
 
-        <Grid>
-          <Tile to="/products">🥾 Footwear & Accessories</Tile>
-          <Tile to="/products">🧥 Jackets & Layers</Tile>
-          <Tile to="/products">🎒 Bags & Essentials</Tile>
-        </Grid>
-      </Hero>
-    </>
+        {/* Only show Sign in if the user is not authenticated */}
+        {!isAuthed && <Ghost to="/login">Sign in</Ghost>}
+      </Actions>
+
+      <Grid>
+        <Tile to="/products">🥾 Footwear & Accessories</Tile>
+        <Tile to="/products">🧥 Jackets & Layers</Tile>
+        <Tile to="/products">🎒 Bags & Essentials</Tile>
+      </Grid>
+    </Hero>
   );
 }

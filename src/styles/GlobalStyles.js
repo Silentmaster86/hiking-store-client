@@ -1,9 +1,11 @@
 import { createGlobalStyle } from "styled-components";
-import bg1 from "../assets/bg/three_peak.JPG";
 
 const GlobalStyles = createGlobalStyle`
   :root{
     color-scheme: dark;
+
+    /* The app background is controlled via CSS variable (set from Layout). */
+    --app-bg: none;
   }
 
   * { box-sizing: border-box; }
@@ -14,21 +16,22 @@ const GlobalStyles = createGlobalStyle`
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     color: ${({ theme }) => theme.colors.text};
 
-    /* ✅ global background image */
+    /* Global background (image + overlays). */
     background-image:
       radial-gradient(1200px 700px at 20% 10%, rgba(255,255,255,0.10), transparent 60%),
       radial-gradient(900px 600px at 85% 20%, rgba(255,140,0,0.12), transparent 55%),
       linear-gradient(180deg, rgba(0,0,0,0.70), rgba(0,0,0,0.78)),
-      url(${bg1});
+      var(--app-bg);
+
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 
-    /* Opcja: efekt "premium" (na desktop). Na mobile czasem laguje, więc wyłączamy niżej. */
+    /* Premium effect (desktop). */
     background-attachment: fixed;
   }
 
-  /* ✅ dodatkowy overlay, żeby czytelność była zawsze OK */
+  /* Extra overlay to keep text readable on any photo. */
   body::before{
     content: "";
     position: fixed;
@@ -41,7 +44,7 @@ const GlobalStyles = createGlobalStyle`
       linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55));
   }
 
-  /* Mobile/iOS: fixed background potrafi szarpać */
+  /* Mobile/iOS: fixed background can stutter. */
   @media (max-width: 900px) {
     body { background-attachment: scroll; }
   }
