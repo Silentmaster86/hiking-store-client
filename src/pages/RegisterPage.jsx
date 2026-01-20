@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { useAuth } from "../context/AuthContext";
 
 const Wrap = styled.div`
-const Wrap = styled.div`
   max-width: 520px;
   margin: 0 auto;
   padding: 12px 0;
@@ -47,7 +46,7 @@ const Muted = styled.p`
 
 const Field = styled.div`
   display: grid;
-  gap: 6px;
+  gap: 16px;
   margin-top: 10px;
 `;
 
@@ -64,21 +63,34 @@ const Input = styled.input`
   border-radius: 12px;
   padding: 11px 12px;
   outline: none;
+
   &:focus { box-shadow: 0 0 0 4px rgba(34,197,94,0.12); }
+
+  /* Better mobile typing */
+  @media (max-width: 520px) {
+    padding: 12px 12px;
+    font-size: 16px; /* prevents iOS zoom */
+  }
 `;
 
 const Btn = styled.button`
-  margin-top: 12px;
+  margin-top: 26px;
   width: 100%;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background: ${({ theme }) => theme.colors.primary};
-  color: #03130f;
+  color: ${({ theme }) => theme.colors.primaryText};
   border-radius: 14px;
   padding: 12px 12px;
   font-weight: 1100;
   cursor: pointer;
-  &:hover { opacity: 0.92; }
+
+  &:hover { opacity: 0.62; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  @media (max-width: 520px) {
+    border-radius: 13px;
+    padding: 12px 12px;
+  }
 `;
 
 const ErrorBox = styled.div`
@@ -142,12 +154,13 @@ export default function RegisterPage() {
 
           <Field>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input id="email" name="email" type="email" inputMode="email" autoComplete="email" value={form.email} onChange={onChange} />
+
           </Field>
 
           <Field>
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" autoComplete="current-password" value={form.password} onChange={(e) => setPassword(e.target.value)} />
+            <Input id="password" name="password" type="password" autoComplete="new-password" value={form.password} onChange={onChange} />
           </Field>
 
           <Field>

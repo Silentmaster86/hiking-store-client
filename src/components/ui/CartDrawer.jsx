@@ -22,6 +22,10 @@ const Panel = styled.aside`
 
   width: min(420px, 92vw); /* desktop default */
 
+  @media (max-width: 520px) {
+  width: min(340px, 88vw);
+  }
+
   @media (max-width: 480px) {
     width: min(340px, 88vw); /* smaller on phones */
   }
@@ -34,6 +38,10 @@ const Panel = styled.aside`
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(12px);
+
+  @media (max-width: 380px) {
+  width: min(320px, 90vw);
+  }
 `;
 
 const Head = styled.div`
