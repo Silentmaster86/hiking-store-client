@@ -19,7 +19,13 @@ const Panel = styled.aside`
   top: 0;
   right: 0;
   height: 100vh;
-  width: min(420px, 92vw);
+
+  width: min(420px, 92vw); /* desktop default */
+
+  @media (max-width: 480px) {
+    width: min(340px, 88vw); /* smaller on phones */
+  }
+
   z-index: 60;
   background: ${({ theme }) => theme.colors.surface};
   border-left: 1px solid ${({ theme }) => theme.colors.border};
@@ -27,10 +33,11 @@ const Panel = styled.aside`
   transition: transform 220ms ease;
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(12px);
 `;
 
 const Head = styled.div`
-  padding: 14px 14px;
+  padding: 12px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -67,7 +74,7 @@ const CloseBtn = styled.button`
 `;
 
 const List = styled.div`
-  padding: 12px 14px;
+  padding: 10px 12px;
   overflow: auto;
   flex: 1;
 `;
@@ -144,7 +151,7 @@ const Remove = styled.button`
 `;
 
 const Foot = styled.div`
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   background: rgba(0,0,0,0.12);
 `;
