@@ -4,9 +4,16 @@ import styled from "styled-components";
 import { useAuth } from "../context/AuthContext";
 
 const Wrap = styled.div`
+const Wrap = styled.div`
   max-width: 520px;
   margin: 0 auto;
   padding: 12px 0;
+
+  /* Mobile: tighter spacing + full width feel */
+  @media (max-width: 520px) {
+    max-width: 420px;
+    padding: 6px 0;
+  }
 `;
 
 const Card = styled.div`
@@ -15,12 +22,22 @@ const Card = styled.div`
   border-radius: 18px;
   padding: 14px;
   box-shadow: ${({ theme }) => theme.shadows.soft};
+  backdrop-filter: blur(10px);
+
+  @media (max-width: 520px) {
+    border-radius: 16px;
+    padding: 12px;
+  }
 `;
 
 const H1 = styled.h1`
   margin: 0 0 6px;
   font-size: 28px;
   letter-spacing: -0.5px;
+
+  @media (max-width: 520px) {
+    font-size: 24px;
+  }
 `;
 
 const Muted = styled.p`
@@ -125,12 +142,12 @@ export default function RegisterPage() {
 
           <Field>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" value={form.email} onChange={onChange} />
+            <Input id="email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </Field>
 
           <Field>
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" value={form.password} onChange={onChange} />
+            <Input id="password" name="password" type="password" autoComplete="current-password" value={form.password} onChange={(e) => setPassword(e.target.value)} />
           </Field>
 
           <Field>
