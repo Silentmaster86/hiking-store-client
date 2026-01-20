@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
 const Hero = styled.section`
@@ -69,10 +68,6 @@ const Tile = styled(Link)`
 `;
 
 export default function HomePage() {
-  const { user, status } = useAuth();
-
-  // More reliable auth check than just `!user`
-  const isAuthed = status !== "loading" && Boolean(user?.id || user?.email);
 
   return (
     <Hero>
@@ -84,9 +79,6 @@ export default function HomePage() {
 
       <Actions>
         <Primary to="/products">Shop products</Primary>
-
-        {/* Only show Sign in if the user is not authenticated */}
-        {!isAuthed && <Ghost to="/login">Sign in</Ghost>}
       </Actions>
 
       <Grid>

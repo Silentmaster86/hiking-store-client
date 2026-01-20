@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import styled from "styled-components";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import CartDrawer from "../ui/CartDrawer";
 import Footer from "./Footer";
@@ -31,6 +31,11 @@ const Main = styled.main`
 `;
 
 export default function Layout() {
+  const location = useLocation();
+  const hideFooter =
+    location.pathname.startsWith("/login") ||
+    location.pathname.startsWith("/register");
+  
   useEffect(() => {
     // Pick one background per page load
     const pick = BGS[Math.floor(Math.random() * BGS.length)];
@@ -44,7 +49,9 @@ export default function Layout() {
         <Main>
           <Outlet />
         </Main>
-        <Footer />
+
+        {/* Show footer everywhere except /login and /register */}
+        { !hideFooter && <Footer /> }
         <CartDrawer />
       </Content>
     </Shell>

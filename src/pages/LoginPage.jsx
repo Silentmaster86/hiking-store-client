@@ -23,8 +23,8 @@ const Card = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.soft};
   backdrop-filter: blur(10px);
 
-  @media (max-width: 520px) {
-    border-radius: 16px;
+  @media (max-width: 480px) {
+    border-radius: 14px;
     padding: 12px;
   }
 `;
@@ -68,8 +68,8 @@ const Input = styled.input`
 
   /* Better mobile typing */
   @media (max-width: 520px) {
-    padding: 12px 12px;
-    font-size: 16px; /* prevents iOS zoom */
+    padding: 10px 12px;
+    font-size: 14px; /* prevents iOS zoom */
   }
 `;
 
@@ -80,8 +80,9 @@ const Btn = styled.button`
   background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.primaryText};
   border-radius: 14px;
-  padding: 12px 12px;
+  padding: 11px;
   font-weight: 1100;
+  font-size: 14px;
   cursor: pointer;
 
   &:hover { opacity: 0.92; }

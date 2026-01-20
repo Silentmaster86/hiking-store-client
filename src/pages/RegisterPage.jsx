@@ -9,9 +9,9 @@ const Wrap = styled.div`
   padding: 12px 0;
 
   /* Mobile: tighter spacing + full width feel */
-  @media (max-width: 520px) {
-    max-width: 420px;
-    padding: 6px 0;
+  @media (max-width: 480px) {
+    max-width: 100%;
+    padding: 8px;
   }
 `;
 
@@ -23,8 +23,8 @@ const Card = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.soft};
   backdrop-filter: blur(10px);
 
-  @media (max-width: 520px) {
-    border-radius: 16px;
+  @media (max-width: 480px) {
+    border-radius: 14px;
     padding: 12px;
   }
 `;
@@ -61,8 +61,9 @@ const Input = styled.input`
   background: rgba(255,255,255,0.03);
   color: ${({ theme }) => theme.colors.text};
   border-radius: 12px;
-  padding: 11px 12px;
+  padding: 10px 12px;
   outline: none;
+  font-size: 14px;
 
   &:focus { box-shadow: 0 0 0 4px rgba(34,197,94,0.12); }
 
@@ -80,8 +81,9 @@ const Btn = styled.button`
   background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.primaryText};
   border-radius: 14px;
-  padding: 12px 12px;
+  padding: 11px;
   font-weight: 1100;
+  font-size: 14px;
   cursor: pointer;
 
   &:hover { opacity: 0.62; }
