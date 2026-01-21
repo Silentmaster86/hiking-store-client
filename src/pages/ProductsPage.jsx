@@ -111,7 +111,11 @@ export default function ProductsPage() {
   const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
+  const category = searchParams.get("category");
 
+  const visibleItems = category
+  ? items.filter((p) => p.category_slug === category)
+  : items;
 
   useEffect(() => {
     let mounted = true;
@@ -142,7 +146,11 @@ export default function ProductsPage() {
     <TitleRow>
       <div>
         <H1>Shop</H1>
-        <Sub>Outdoor essentials for UK weekends.</Sub>
+        <Sub>
+          Outdoor essentials for UK weekends.
+          {category ? ` • Category: ${category}` : ""}
+        </Sub>
+
       </div>
     </TitleRow>
 
@@ -157,12 +165,18 @@ export default function ProductsPage() {
       </div>
     )}
 
+    {status === "done" && visibleItems.length === 0 && (
+      <div style={{ opacity: 0.8 }}>
+        No products found{category ? ` in "${category}"` : ""}.
+      </div>
+    )}
+
     {status === "done" && (
       <Grid>
-        {items.map((p) => {
+        {visibleItems.map((p) => {
           const isHighlighted =
             highlightId && String(p.id) === String(highlightId);
-
+        
           return (
             <Card key={p.id} $highlight={isHighlighted}>
               <Img />

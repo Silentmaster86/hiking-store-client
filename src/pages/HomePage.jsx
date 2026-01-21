@@ -1,5 +1,14 @@
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { fetchProducts } from "../api/products";
+import CategorySections from "../components/home/CategorySections";
+
+const Wrap = styled.div`
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 0;
+`;
 
 const Hero = styled.section`
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -68,8 +77,22 @@ const Tile = styled(Link)`
 `;
 
 export default function HomePage() {
+  const [products, setProducts] = useState([]);
+  const [status, setStatus] = useState("idle");
 
+  useEffect(() => {
+    setStatus("loading");
+    fetchProducts()
+      .then((data) => {
+        setProducts(Array.isArray(data) ? data : []);
+        setStatus("done");
+      })
+      .catch(() => { setStatus("error"); });
+  }, []);
+  
   return (
+
+    <Wrap>
     <Hero>
       <Title>Gear up for the trail.</Title>
       <Lead>
@@ -82,10 +105,17 @@ export default function HomePage() {
       </Actions>
 
       <Grid>
-        <Tile to="/products">🥾 Footwear & Accessories</Tile>
-        <Tile to="/products">🧥 Jackets & Layers</Tile>
-        <Tile to="/products">🎒 Bags & Essentials</Tile>
+        <Tile to="/products?category=boots">🥾 Boots</Tile>
+        <Tile to="/products?category=jackets">🧥 Jackets & Layers</Tile>
+        <Tile to="/products?category=backpacks">🎒 Backpacks</Tile>
+        <Tile to="/products?category=accessories">🎯 Accessories</Tile>
       </Grid>
-    </Hero>
+
+      </Hero>
+
+      {status === "loading" && <div>Loading</div>}
+      {status === "done" && <CategorySections products={products} />}
+      {status === "error" && <div style={{ color: "crimson"}}>Failed to load.</div>}
+    </Wrap>
   );
 }
