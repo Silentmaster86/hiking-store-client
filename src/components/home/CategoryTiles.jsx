@@ -60,10 +60,10 @@ function formatPrice(cents) {
 }
 
 const CATS = [
-  { slug: "boots", title: "🥾 Boots" },
-  { slug: "jackets", title: "🧥 Jackets & Layers" },
-  { slug: "backpacks", title: "🎒 Backpacks" },
-  { slug: "accessories", title: "🧭 Accessories" },
+  { slug: "boots", title: "🥾 Boots", cover: "/src/assets/img/category/boots-cover.jpg" },
+  { slug: "jackets", title: "🧥 Jackets & Layers", cover: "/src/assets/img/category/jackets-cover.jpg" },
+  { slug: "backpacks", title: "🎒 Backpacks", cover: "/src/assets/img/category/backpacks-cover.jpg" },
+  { slug: "accessories", title: "🧭 Accessories", cover: "/src/assets/img/category/accessories-cover.jpg" },
 ];
 
 function pickRandom(arr) {
