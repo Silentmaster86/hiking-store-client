@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import { Link, useSearchParams } from "react-router-dom";
 import { fetchProducts } from "../api/products";
 import { useCart } from "../context/CartContext";
-import { useSearchParams } from "react-router-dom";
 
 const Wrap = styled.div`
   max-width: 1100px;
@@ -15,7 +15,7 @@ const TitleRow = styled.div`
   align-items: end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 `;
 
 const H1 = styled.h1`
@@ -27,6 +27,29 @@ const H1 = styled.h1`
 const Sub = styled.p`
   margin: 6px 0 0;
   color: ${({ theme }) => theme.colors.muted};
+`;
+
+const Chips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 16px;
+`;
+
+const Chip = styled(Link)`
+  text-decoration: none;
+  font-weight: 1000;
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.text};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.92;
+  }
 `;
 
 const Grid = styled.div`
@@ -98,12 +121,49 @@ const Btn = styled.button`
   padding: 10px 12px;
   border-radius: 12px;
   cursor: pointer;
-  &:hover { opacity: 0.92; }
+  &:hover {
+    opacity: 0.92;
+  }
 `;
 
 function formatPrice(cents) {
   const value = (Number(cents || 0) / 100).toFixed(2);
   return `£${value}`;
+}
+
+const CATS = [
+  {
+    slug: "boots",
+    label: "🥾 Boots",
+    title: "Hiking Boots",
+    desc:
+      "Support, grip, and comfort for muddy trails and long UK hikes. Pick your footwear and hit the path.",
+  },
+  {
+    slug: "jackets",
+    label: "🧥 Jackets",
+    title: "Jackets & Layers",
+    desc:
+      "Rain-ready shells and warm midlayers for unpredictable weather. Stay dry, warm, and comfortable.",
+  },
+  {
+    slug: "backpacks",
+    label: "🎒 Backpacks",
+    title: "Backpacks",
+    desc:
+      "Daypacks and trail packs for weekend adventures. Carry essentials with comfort and smart storage.",
+  },
+  {
+    slug: "accessories",
+    label: "🧭 Accessories",
+    title: "Accessories",
+    desc:
+      "The small gear that makes a big difference: poles, bottles, lights, first-aid and more.",
+  },
+];
+
+function getCategoryMeta(category) {
+  return CATS.find((c) => c.slug === category) || null;
 }
 
 export default function ProductsPage() {
@@ -116,6 +176,8 @@ export default function ProductsPage() {
   const highlightId = searchParams.get("highlight");
   const category = searchParams.get("category");
 
+  const catMeta = getCategoryMeta(category);
+
   useEffect(() => {
     let mounted = true;
 
@@ -127,15 +189,21 @@ export default function ProductsPage() {
       .catch((e) => {
         if (!mounted) return;
         setError(e?.message || "Failed to load products");
-        setItems([]); // opcjonalnie, żeby UI nie wisiał w loading
+        setItems([]); // żeby nie wisieć w loading
       });
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    document.title = "Products — Hiking Store";
-  }, []);
+    const title = category
+      ? `${catMeta?.title || category} — Hiking Store`
+      : "Products — Hiking Store";
+    document.title = title;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
 
   const visibleItems = useMemo(() => {
     const list = items || [];
@@ -146,13 +214,26 @@ export default function ProductsPage() {
     <Wrap>
       <TitleRow>
         <div>
-          <H1>Shop</H1>
+          <H1>{category ? (catMeta?.title || "Category") : "Shop"}</H1>
           <Sub>
-            Outdoor essentials for UK weekends.
-            {category ? ` • Category: ${category}` : ""}
+            {category
+              ? (catMeta?.desc || `Browse products in "${category}".`)
+              : "Outdoor essentials for UK weekends."}
           </Sub>
         </div>
       </TitleRow>
+
+      {/* Chips: tylko na stronach kategorii */}
+      {category && (
+        <Chips>
+          <Chip to="/products">🛒 All products</Chip>
+          {CATS.filter((c) => c.slug !== category).map((c) => (
+            <Chip key={c.slug} to={`/products?category=${c.slug}`}>
+              {c.label}
+            </Chip>
+          ))}
+        </Chips>
+      )}
 
       {items === null && !error && <div>Loading products…</div>}
 
