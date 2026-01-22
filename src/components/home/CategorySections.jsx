@@ -84,6 +84,25 @@ const Price = styled.div`
   font-weight: 800;
 `;
 
+const Chips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+`;
+
+const Chip = styled(Link)`
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.text};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: rgba(255,255,255,0.03);
+  padding: 8px 10px;
+  border-radius: 999px;
+  &:hover { opacity: 0.92; }
+`;
+
 function formatPrice(cents) {
   const value = (Number(cents || 0) / 100).toFixed(2);
   return `£${value}`;
@@ -110,22 +129,38 @@ export default function CategorySections({ products = [] }) {
               <TitleWrap>
                 <H2>{cat.title}</H2>
                 <P>{cat.desc}</P>
+                  
+                <Chips>
+                  {CATS.filter((c) => c.slug !== cat.slug).map((c) => (
+                    <Chip key={c.slug} to={`/products?category=${c.slug}`}>
+                      {c.title}
+                    </Chip>
+                  ))}
+                </Chips>
               </TitleWrap>
+                
               <ViewAll to={`/products?category=${cat.slug}`}>View all</ViewAll>
             </Head>
-
-            <Grid>
-              {items.map((p) => (
-                <MiniCard key={p.id}>
-                  <Img />
-                  <Body>
-                    <Name>{p.name}</Name>
-                    <Price>{formatPrice(p.price_cents)}</Price>
-                  </Body>
-                </MiniCard>
-              ))}
-            </Grid>
+                
+            {items.length === 0 ? (
+              <div style={{ opacity: 0.75, padding: "8px 0" }}>
+                No products in this category yet.
+              </div>
+            ) : (
+              <Grid>
+                {items.map((p) => (
+                  <MiniCard key={p.id}>
+                    <Img />
+                    <Body>
+                      <Name>{p.name}</Name>
+                      <Price>{formatPrice(p.price_cents)}</Price>
+                    </Body>
+                  </MiniCard>
+                ))}
+              </Grid>
+            )}
           </Section>
+
         );
       })}
     </>
