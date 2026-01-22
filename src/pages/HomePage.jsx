@@ -78,18 +78,27 @@ const Tile = styled(Link)`
 `;
 
 export default function HomePage() {
-  const [products, setProducts] = useState([]);
-  const [status, setStatus] = useState("idle");
+  const [products, setProducts] = useState(null); // null = loading
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setStatus("loading");
+    let mounted = true;
+
     fetchProducts()
       .then((data) => {
+        if (!mounted) return;
         setProducts(Array.isArray(data) ? data : []);
-        setStatus("done");
       })
-      .catch(() => { setStatus("error"); });
+      .catch((err) => {
+        if (!mounted) return;
+        setError(err?.message || "Failed to load");
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
+
   
   return (
 
@@ -109,9 +118,10 @@ export default function HomePage() {
 
       </Hero>
 
-      {status === "loading" && <div>Loading</div>}
-      {status === "done" && <CategorySections products={products} />}
-      {status === "error" && <div style={{ color: "crimson"}}>Failed to load.</div>}
+      {!products && !error && <div>Loading…</div>}
+      {error && <div style={{ color: "crimson" }}>{error}</div>}
+      {products && <CategoryTiles products={products} />}
+
     </Wrap>
   );
 }

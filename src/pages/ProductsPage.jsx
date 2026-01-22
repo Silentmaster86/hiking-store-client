@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { fetchProducts } from "../api/products";
 import { useCart } from "../context/CartContext";
 import { useSearchParams } from "react-router-dom";
-
 
 const Wrap = styled.div`
   max-width: 1100px;
@@ -49,15 +48,18 @@ const Card = styled.div`
   border-radius: 16px;
   overflow: hidden;
   box-shadow: ${({ theme, $highlight }) =>
-  $highlight
-    ? `0 0 0 6px rgba(34,197,94,0.14), ${theme.shadows.soft}`
-    : theme.shadows.soft};
+    $highlight
+      ? `0 0 0 6px rgba(34,197,94,0.14), ${theme.shadows.soft}`
+      : theme.shadows.soft};
   transition: box-shadow 0.2s ease;
 `;
 
 const Img = styled.div`
   height: 170px;
-  background: linear-gradient(120deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02));
+  background: ${({ $url }) =>
+    $url
+      ? `url(${$url}) center/cover no-repeat`
+      : `linear-gradient(120deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))`};
 `;
 
 const Body = styled.div`
@@ -106,93 +108,91 @@ function formatPrice(cents) {
 
 export default function ProductsPage() {
   const { addItem } = useCart();
-  const [items, setItems] = useState([]);
-  const [status, setStatus] = useState("idle"); // idle | loading | error | done
-  const [error, setError] = useState("");
+
+  const [items, setItems] = useState(null); // null = loading
+  const [error, setError] = useState(null);
+
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const category = searchParams.get("category");
 
-  const visibleItems = category
-  ? items.filter((p) => p.category_slug === category)
-  : items;
-
   useEffect(() => {
     let mounted = true;
-    setStatus("loading");
+
     fetchProducts()
       .then((data) => {
         if (!mounted) return;
         setItems(Array.isArray(data) ? data : []);
-        setStatus("done");
       })
       .catch((e) => {
         if (!mounted) return;
-        setError(e.message || "Failed to load products");
-        setStatus("error");
+        setError(e?.message || "Failed to load products");
+        setItems([]); // opcjonalnie, żeby UI nie wisiał w loading
       });
 
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
     document.title = "Products — Hiking Store";
   }, []);
-  
+
+  const visibleItems = useMemo(() => {
+    const list = items || [];
+    return category ? list.filter((p) => p.category_slug === category) : list;
+  }, [items, category]);
+
   return (
-  <Wrap>
-    <TitleRow>
-      <div>
-        <H1>Shop</H1>
-        <Sub>
-          Outdoor essentials for UK weekends.
-          {category ? ` • Category: ${category}` : ""}
-        </Sub>
-
-      </div>
-    </TitleRow>
-
-    {status === "loading" && <div>Loading products…</div>}
-
-    {status === "error" && (
-      <div style={{ color: "crimson" }}>
-        {error}
-        <div style={{ marginTop: 8, color: "#666" }}>
-          Tip: sprawdź czy w Netlify masz ustawione <b>VITE_API_URL</b> na Render.
+    <Wrap>
+      <TitleRow>
+        <div>
+          <H1>Shop</H1>
+          <Sub>
+            Outdoor essentials for UK weekends.
+            {category ? ` • Category: ${category}` : ""}
+          </Sub>
         </div>
-      </div>
-    )}
+      </TitleRow>
 
-    {status === "done" && visibleItems.length === 0 && (
-      <div style={{ opacity: 0.8 }}>
-        No products found{category ? ` in "${category}"` : ""}.
-      </div>
-    )}
+      {items === null && !error && <div>Loading products…</div>}
 
-    {status === "done" && (
-      <Grid>
-        {visibleItems.map((p) => {
-          const isHighlighted =
-            highlightId && String(p.id) === String(highlightId);
-        
-          return (
-            <Card key={p.id} $highlight={isHighlighted}>
-              <Img />
-              <Body>
-                <Name>{p.name}</Name>
-                <Desc>{p.description}</Desc>
-                <Bar>
-                  <Price>{formatPrice(p.price_cents)}</Price>
-                  <Btn onClick={() => addItem(p, 1)}>Add to cart</Btn>
-                </Bar>
-              </Body>
-            </Card>
-          );
-        })}
-      </Grid>
-    )}
-  </Wrap>
+      {error && (
+        <div style={{ color: "crimson" }}>
+          {error}
+          <div style={{ marginTop: 8, color: "#666" }}>
+            Tip: sprawdź czy w Netlify masz ustawione <b>VITE_API_URL</b> na Render.
+          </div>
+        </div>
+      )}
+
+      {items !== null && !error && visibleItems.length === 0 && (
+        <div style={{ opacity: 0.8 }}>
+          No products found{category ? ` in "${category}"` : ""}.
+        </div>
+      )}
+
+      {items !== null && !error && visibleItems.length > 0 && (
+        <Grid>
+          {visibleItems.map((p) => {
+            const isHighlighted =
+              highlightId && String(p.id) === String(highlightId);
+
+            return (
+              <Card key={p.id} $highlight={isHighlighted}>
+                <Img $url={p.image_url || ""} />
+                <Body>
+                  <Name>{p.name}</Name>
+                  <Desc>{p.description}</Desc>
+                  <Bar>
+                    <Price>{formatPrice(p.price_cents)}</Price>
+                    <Btn onClick={() => addItem(p, 1)}>Add to cart</Btn>
+                  </Bar>
+                </Body>
+              </Card>
+            );
+          })}
+        </Grid>
+      )}
+    </Wrap>
   );
 }
