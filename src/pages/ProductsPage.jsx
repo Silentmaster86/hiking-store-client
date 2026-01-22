@@ -235,19 +235,6 @@ export default function ProductsPage() {
         </Chips>
       )}
 
-     
-      {category && (
-        <Chips>                
-          {category && <Chip to="/products">🛒 All products</Chip>}
-              
-          {CATS.filter((c) => !category || c.slug !== category).map((c) => (
-            <Chip key={c.slug} to={`/products?category=${c.slug}`}>
-              {c.label}
-            </Chip>
-          ))}
-        </Chips>
-      )}
-
       {items === null && !error && <div>Loading products…</div>}
 
       {error && (
