@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { fetchProducts } from "../api/products";
 import CategorySections from "../components/home/CategorySections";
+import CategoryTiles from "../components/home/CategoryTiles";
 
 const Wrap = styled.div`
   max-width: 1100px;
@@ -104,12 +105,7 @@ export default function HomePage() {
         <Primary to="/products">Shop products</Primary>
       </Actions>
 
-      <Grid>
-        <Tile to="/products?category=boots">🥾 Boots</Tile>
-        <Tile to="/products?category=jackets">🧥 Jackets & Layers</Tile>
-        <Tile to="/products?category=backpacks">🎒 Backpacks</Tile>
-        <Tile to="/products?category=accessories">🎯 Accessories</Tile>
-      </Grid>
+      <CategoryTiles products={products} />
 
       </Hero>
 
