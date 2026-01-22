@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { fetchProducts } from "../api/products";
-import CategorySections from "../components/home/CategorySections";
 import CategoryTiles from "../components/home/CategoryTiles";
 
 const Wrap = styled.div`
@@ -48,35 +47,6 @@ const Primary = styled(Link)`
   border: 1px solid rgba(0,0,0,0.2);
 `;
 
-const Ghost = styled(Link)`
-  text-decoration: none;
-  background: rgba(255,255,255,0.04);
-  color: ${({ theme }) => theme.colors.text};
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-weight: 1000;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-`;
-
-const Grid = styled.div`
-  margin-top: 14px;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  @media (max-width: 900px) { grid-template-columns: 1fr; }
-`;
-
-const Tile = styled(Link)`
-  text-decoration: none;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.surface2};
-  border-radius: 18px;
-  padding: 14px;
-  color: ${({ theme }) => theme.colors.text};
-
-  &:hover { background: rgba(255,255,255,0.06); }
-`;
-
 export default function HomePage() {
   const [products, setProducts] = useState(null); // null = loading
   const [error, setError] = useState(null);
@@ -92,6 +62,7 @@ export default function HomePage() {
       .catch((err) => {
         if (!mounted) return;
         setError(err?.message || "Failed to load");
+        setProducts([]); // żeby nie wisieć w loading, opcjonalnie
       });
 
     return () => {
@@ -99,29 +70,25 @@ export default function HomePage() {
     };
   }, []);
 
-  
   return (
-
     <Wrap>
-    <Hero>
-      <Title>Gear up for the trail.</Title>
-      <Lead>
-        Outdoor essentials for hiking in the UK — jackets, packs, accessories.
-        Fast checkout, clean UI, real API + sessions.
-      </Lead>
+      <Hero>
+        <Title>Gear up for the trail.</Title>
+        <Lead>
+          Outdoor essentials for hiking in the UK — jackets, packs, accessories.
+          Fast checkout, clean UI, real API + sessions.
+        </Lead>
 
-      <Actions>
-        <Primary to="/products">Shop products</Primary>
-      </Actions>
+        <Actions>
+          <Primary to="/products">Shop products</Primary>
+        </Actions>
 
-      <CategoryTiles products={products} />
+        {products === null && !error && <div style={{ marginTop: 14 }}>Loading…</div>}
+        {error && <div style={{ marginTop: 14, color: "crimson" }}>{error}</div>}
 
+        {/* NAJWAŻNIEJSZE: products || [] */}
+        {products !== null && !error && <CategoryTiles products={products || []} />}
       </Hero>
-
-      {!products && !error && <div>Loading…</div>}
-      {error && <div style={{ color: "crimson" }}>{error}</div>}
-      {products && <CategoryTiles products={products} />}
-
     </Wrap>
   );
 }
