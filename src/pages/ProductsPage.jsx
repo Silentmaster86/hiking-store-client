@@ -242,7 +242,7 @@ export default function ProductsPage() {
         <div style={{ color: "crimson" }}>
           {error}
           <div style={{ marginTop: 8, color: "#666" }}>
-            Tip: sprawdź czy w Netlify masz ustawione <b>VITE_API_URL</b> na Render.
+            Check web address in Render.
           </div>
         </div>
       )}
