@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import * as authApi from "../api/auth";
 
 const AuthContext = createContext(null);
@@ -7,18 +7,20 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [status, setStatus] = useState("loading"); // loading | ready
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
     try {
       const data = await authApi.getMe();
       setUser(data?.user || null);
+    } catch {
+      setUser(null);
     } finally {
       setStatus("ready");
     }
-  }
+  }, []);
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
 
   async function login(payload) {
     const data = await authApi.login(payload);
@@ -35,7 +37,7 @@ export function AuthProvider({ children }) {
   async function logout() {
     await authApi.logout();
     setUser(null);
-    await refresh(); // bo logout tworzy guest cart w sesji
+    await refresh(); // logout tworzy guest cart w sesji
   }
 
   return (
