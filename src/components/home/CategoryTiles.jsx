@@ -46,21 +46,7 @@ const CatTitle = styled.div`
   opacity: 0.95;
 `;
 
-const ProductName = styled.div`
-  font-weight: 900;
-  font-size: 13px;
-  opacity: 0.9;
-`;
 
-const Price = styled.div`
-  font-weight: 1000;
-  font-size: 13px;
-`;
-
-function formatPrice(cents) {
-  const value = (Number(cents || 0) / 100).toFixed(2);
-  return `£${value}`;
-}
 
 const CATS = [
   { slug: "boots", title: "🥾 Boots", cover: "/img/categories/boots-cover.jpg" },
@@ -87,16 +73,6 @@ export default function CategoryTiles({ products = [], loading = false }) {
             <Body>
               <CatTitle>{cat.title}</CatTitle>
 
-              {loading ? (
-                <ProductName style={{ opacity: 0.65 }}>Loading picks…</ProductName>
-              ) : sample ? (
-                <>
-                  <ProductName>{sample.name}</ProductName>
-                  <Price>{formatPrice(sample.price_cents)}</Price>
-                </>
-              ) : (
-                <ProductName style={{ opacity: 0.65 }}>No products yet</ProductName>
-              )}
             </Body>
           </Tile>
         );
