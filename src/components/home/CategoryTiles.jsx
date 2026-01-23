@@ -76,28 +76,28 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export default function CategoryTiles({ products = [] }) {
+export default function CategoryTiles({ products = [], loading = false }) {
   return (
     <Grid>
       {CATS.map((cat) => {
-        const items = products.filter((p) => p.category_slug === cat.slug);
+        const items = (products || []).filter((p) => p.category_slug === cat.slug);
         const sample = pickRandom(items);
 
         return (
-          <Img $url={sample?.image_url} $fallback={cat.cover} />
+          <Tile key={cat.slug} to={`/products?category=${cat.slug}`}>
+            <Img $url={sample?.image_url} $fallback={cat.cover} />
             <Body>
               <CatTitle>{cat.title}</CatTitle>
 
               {loading ? (
-  <ProductName style={{ opacity: 0.65 }}>Loading picks…</ProductName>
-) : sample ? (
-  <>
-    <ProductName>{sample.name}</ProductName>
-    <Price>{formatPrice(sample.price_cents)}</Price>
-  </>
-) : (
-  <ProductName style={{ opacity: 0.65 }}>No products yet</ProductName>
-)}
+                <ProductName style={{ opacity: 0.65 }}>Loading picks…</ProductName>
+              ) : sample ? (
+                <>
+                  <ProductName>{sample.name}</ProductName>
+                  <Price>{formatPrice(sample.price_cents)}</Price>
+                </>
+              ) : (
+                <ProductName style={{ opacity: 0.65 }}>No products yet</ProductName>
               )}
             </Body>
           </Tile>
