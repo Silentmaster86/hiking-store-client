@@ -223,15 +223,13 @@ export default function ProductsPage() {
         </div>
       </TitleRow>
 
-      {category && (
         <Chips>
-          {category && <Chip to="/products">🛒 All products</Chip>}
-              
-          {CATS.filter((c) => !category || c.slug !== category).map((c) => (
-            <Chip key={c.slug} to={`/products?category=${c.slug}`}>
-              {c.label}
-            </Chip>
-          ))}
+         {category && <Chip to="/products">🛒 All products</Chip>}
+         {CATS.filter((c) => !category || c.slug !== category).map((c) => (
+         <Chip key={c.slug} to={`/products?category=${c.slug}`}>
+          {c.label}
+         </Chip>
+         ))}
         </Chips>
 
       )}
