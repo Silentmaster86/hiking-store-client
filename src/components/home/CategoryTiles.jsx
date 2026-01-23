@@ -24,7 +24,7 @@ const Tile = styled(Link)`
 `;
 
 const Img = styled.div`
-  height: 100px;
+  height: 80px;
 
   background-image: ${({ $url, $fallback }) => {
     const a = $url ? `url(${$url})` : "none";
