@@ -88,13 +88,16 @@ export default function CategoryTiles({ products = [] }) {
             <Body>
               <CatTitle>{cat.title}</CatTitle>
 
-              {sample ? (
-                <>
-                  <ProductName>{sample.name}</ProductName>
-                  <Price>{formatPrice(sample.price_cents)}</Price>
-                </>
-              ) : (
-                <ProductName style={{ opacity: 0.65 }}>No products yet</ProductName>
+              {loading ? (
+  <ProductName style={{ opacity: 0.65 }}>Loading picks…</ProductName>
+) : sample ? (
+  <>
+    <ProductName>{sample.name}</ProductName>
+    <Price>{formatPrice(sample.price_cents)}</Price>
+  </>
+) : (
+  <ProductName style={{ opacity: 0.65 }}>No products yet</ProductName>
+)}
               )}
             </Body>
           </Tile>
