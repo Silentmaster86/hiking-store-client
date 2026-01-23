@@ -31,7 +31,6 @@ const Img = styled.div`
     const b = $fallback ? `url(${$fallback})` : "none";
     return `${a}, ${b}`;
   }};
-  background-position: top center, top center;
   background-size: cover, cover;
 `;
 
