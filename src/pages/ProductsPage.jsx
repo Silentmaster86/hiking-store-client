@@ -81,7 +81,7 @@ const Img = styled.div`
   height: 170px;
   background: ${({ $url }) =>
     $url
-      ? `url(${$url}) center/cover no-repeat`
+      ? `url(${$url}) center/contain no-repeat`
       : `linear-gradient(120deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02))`};
 `;
 
