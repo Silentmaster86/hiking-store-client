@@ -55,17 +55,11 @@ const CATS = [
   { slug: "accessories", title: "🧭 Accessories", cover: "/img/categories/accessories-cover.jpg" },
 ];
 
-function pickRandom(arr) {
-  if (!arr.length) return null;
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
-export default function CategoryTiles({ products = [], loading = false }) {
+export default function CategoryTiles() {
   return (
     <Grid>
       {CATS.map((cat) => {
-        const items = (products || []).filter((p) => p.category_slug === cat.slug);
-        const sample = pickRandom(items);
 
         return (
           <Tile key={cat.slug} to={`/products?category=${cat.slug}`}>
