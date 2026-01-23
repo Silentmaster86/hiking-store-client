@@ -87,7 +87,7 @@ export default function HomePage() {
         {error && <div style={{ marginTop: 14, color: "crimson" }}>{error}</div>}
 
         {/* NAJWAŻNIEJSZE: products || [] */}
-        {products !== null && !error && <CategoryTiles products={products || []} />}
+        <CategoryTiles products={products || []} loading={products === null} />
       </Hero>
     </Wrap>
   );
