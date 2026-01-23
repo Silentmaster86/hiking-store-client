@@ -229,10 +229,8 @@ export default function ProductsPage() {
          <Chip key={c.slug} to={`/products?category=${c.slug}`}>
           {c.label}
          </Chip>
-         ))}
+        ))}
         </Chips>
-
-      )}
 
       {items === null && !error && <div>Loading products…</div>}
 
