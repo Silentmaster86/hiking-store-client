@@ -24,16 +24,15 @@ const Tile = styled(Link)`
 `;
 
 const Img = styled.div`
-  height: 140px;
+  height: 130px;
 
   background-image: ${({ $url, $fallback }) => {
     const a = $url ? `url(${$url})` : "none";
     const b = $fallback ? `url(${$fallback})` : "none";
     return `${a}, ${b}`;
   }};
-  background-position: center, center;
+  background-position: top center, top center;
   background-size: cover, cover;
-  background-repeat: no-repeat, no-repeat;
 `;
 
 const Body = styled.div`
