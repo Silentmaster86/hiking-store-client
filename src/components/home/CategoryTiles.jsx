@@ -25,10 +25,15 @@ const Tile = styled(Link)`
 
 const Img = styled.div`
   height: 140px;
-  background: ${({ $url }) =>
-    $url
-      ? `url(${$url}) center/cover no-repeat`
-      : `linear-gradient(120deg, rgba(0,0,0,0.10), rgba(0,0,0,0.02))`};
+
+  background-image: ${({ $url, $fallback }) => {
+    const a = $url ? `url(${$url})` : "none";
+    const b = $fallback ? `url(${$fallback})` : "none";
+    return `${a}, ${b}`;
+  }};
+  background-position: center, center;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
 `;
 
 const Body = styled.div`
@@ -79,8 +84,7 @@ export default function CategoryTiles({ products = [] }) {
         const sample = pickRandom(items);
 
         return (
-          <Tile key={cat.slug} to={`/products?category=${cat.slug}`}>
-            <Img $url={sample?.image_url || cat.cover} />
+          <Img $url={sample?.image_url} $fallback={cat.cover} />
             <Body>
               <CatTitle>{cat.title}</CatTitle>
 
