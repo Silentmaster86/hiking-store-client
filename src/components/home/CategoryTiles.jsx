@@ -69,7 +69,7 @@ export default function CategoryTiles({ products = [], loading = false }) {
 
         return (
           <Tile key={cat.slug} to={`/products?category=${cat.slug}`}>
-            <Img $url={sample?.image_url} $fallback={cat.cover} />
+            <Img $url={null} $fallback={cat.cover} />
             <Body>
               <CatTitle>{cat.title}</CatTitle>
 
