@@ -60,10 +60,10 @@ function formatPrice(cents) {
 }
 
 const CATS = [
-  { slug: "boots", title: "🥾 Boots", cover: "/src/assets/img/category/boots-cover.jpg" },
-  { slug: "jackets", title: "🧥 Jackets & Layers", cover: "/src/assets/img/category/jackets-cover.jpg" },
-  { slug: "backpacks", title: "🎒 Backpacks", cover: "/src/assets/img/category/backpacks-cover.jpg" },
-  { slug: "accessories", title: "🧭 Accessories", cover: "/src/assets/img/category/accessories-cover.jpg" },
+  { slug: "boots", title: "🥾 Boots", cover: "/img/categories/boots-cover.jpg" },
+  { slug: "jackets", title: "🧥 Jackets & Layers", cover: "/img/categories/jackets-cover.jpg" },
+  { slug: "backpacks", title: "🎒 Backpacks", cover: "/img/categories/backpacks-cover.jpg" },
+  { slug: "accessories", title: "🧭 Accessories", cover: "/img/categories/accessories-cover.jpg" },
 ];
 
 function pickRandom(arr) {
@@ -80,7 +80,7 @@ export default function CategoryTiles({ products = [] }) {
 
         return (
           <Tile key={cat.slug} to={`/products?category=${cat.slug}`}>
-            <Img $url={sample?.image_url || ""} />
+            <Img $url={sample?.image_url || cat.cover} />
             <Body>
               <CatTitle>{cat.title}</CatTitle>
 
