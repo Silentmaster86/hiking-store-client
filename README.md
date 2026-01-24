@@ -2,33 +2,50 @@
 
 A modern **e-commerce web application** built as a **portfolio project for a Junior Frontend Developer role**.
 
-The goal of this project was to demonstrate real-world frontend skills such as **React architecture, API integration, state management, routing, UX polish**, and collaboration with a backend API — without overengineering.
+This project simulates a real-world online store and focuses on demonstrating **frontend engineering skills**, clean architecture, API integration, and UX best practices — while intentionally avoiding overengineering.
 
-Live demo: [https://hiking-store-uk.netlify.app](https://hiking-store-uk.netlify.app)
+👉 Live demo:  
+https://hiking-store-uk.netlify.app
+
+---
+
+## 🎯 Project Goals
+
+The main goals of this project were to:
+
+* Build a realistic React SPA with clean structure
+* Integrate with a real backend API
+* Handle async states, errors, and edge cases
+* Demonstrate production-style UX patterns
+* Show how a frontend works with sessions & server state
+* Create a portfolio-ready project similar to real commercial work
 
 ---
 
 ## Tech Stack
 
-**Frontend**
+### Frontend
 
 * React (Vite)
 * React Router (SPA navigation)
 * Styled-components
-* Context API (cart state)
+* Context API (global cart & auth state)
 * Fetch API
+* Responsive design (mobile-first)
 
-**Backend (provided / integrated)**
+### Backend (integrated)
 
 * Node.js + Express
 * PostgreSQL
-* Sessions & cookies (guest checkout)
+* Server-side sessions & cookies
+* Guest + authenticated carts
 * Hosted on Render
 
-**Deployment**
+### Deployment
 
-* Netlify (frontend)
-* Render (backend)
+* Netlify — frontend
+* Render — backend API
+* PostgreSQL — database
 
 ---
 
@@ -36,56 +53,72 @@ Live demo: [https://hiking-store-uk.netlify.app](https://hiking-store-uk.netlify
 
 ### 🛒 Shopping & Cart
 
-* Product list fetched from API
+* Product list fetched from REST API
+* Category filtering & navigation
 * Add to cart / remove / quantity update
 * Server-side cart stored in session
 * Cart persists across page reloads
+* Guest + logged-in user cart support
 
 ### ✅ Checkout Flow
 
 * Guest checkout (no login required)
 * Form validation (email, address, postcode)
 * POST `/checkout` integration
+* Order creation in database
 * Cart is cleared after successful checkout
 
 ### 📦 Orders
 
 * Order confirmation page with order number & total
-* Orders stored in database
+* Orders stored in PostgreSQL
 * Protected order details page (auth required)
-* Friendly error handling (401, empty states)
+* Friendly empty states & error handling (401, 404)
+
+### 🔐 Authentication
+
+* Email + password authentication
+* Session-based auth
+* OAuth login (Passport.js):
+  * Google
+  * Facebook
+* Protected routes for user-specific data
 
 ### 🎨 UI & UX
 
 * Responsive layout (mobile & desktop)
-* Loading states & disabled buttons during requests
+* Skeleton loaders & loading states
+* Disabled buttons during requests
 * Clear success & error messages
-* Consistent design system using styled-components
+* Consistent design system with styled-components
+* Category tiles & chips navigation
 
 ---
 
 ## What I Learned
 
-During this project I learned how to:
+During this project I practiced and improved:
 
-* Build a **realistic React application structure**
-* Work with a backend API and handle async states
-* Manage global state (cart) using Context API
-* Implement a full checkout flow without payments
-* Handle edge cases (empty cart, unauthorized access)
-* Debug API issues using browser DevTools
-* Improve UX with loading & error states
+* Designing a **realistic React app architecture**
+* Working with a real backend API
+* Managing global state with Context API
+* Handling async loading & error states
+* Building session-based cart logic
+* Implementing protected routes
+* Debugging API & auth issues
+* Improving UX with skeleton loaders & feedback
+* Working with cookies & CORS in production
 
 ---
 
 ## Project Scope (Intentional Decisions)
 
-To keep the project focused on **frontend fundamentals**, the following features were intentionally **not implemented**:
+To keep the project focused on **frontend fundamentals**, the following features were intentionally **not implemented yet**:
 
 * Payments (e.g. Stripe)
 * Admin panel
-* User authentication UI
-* Stock management
+* Product management UI
+* Stock & inventory management
 * Email notifications
 
 These features are outside the scope of a Junior Frontend portfolio and would add unnecessary complexity.
@@ -96,14 +129,19 @@ These features are outside the scope of a Junior Frontend portfolio and would ad
 
 ### Home Page
 ![Home Page Screenshot](./src/assets/screenshots/home.png)
-### Products page
+
+### Products Page
 ![Products Page Screenshot](./src/assets/screenshots/products.png)
-### Cart drawer
-![Cart drawer Screenshot](./src/assets/screenshots/cartDrawer.png)
-### Order confirmation page
-![Order confirmation Page Screenshot](./src/assets/screenshots/order_confirmation.png)
+
+### Cart Drawer
+![Cart Drawer Screenshot](./src/assets/screenshots/cartDrawer.png)
+
 ### Checkout Page
 ![Checkout Page Screenshot](./src/assets/screenshots/checkout.png)
+
+### Order Confirmation Page
+![Order Confirmation Screenshot](./src/assets/screenshots/order_confirmation.png)
+
 ---
 
 ## How to Run Locally
@@ -111,19 +149,3 @@ These features are outside the scope of a Junior Frontend portfolio and would ad
 ```bash
 npm install
 npm run dev
-```
-
-Make sure the backend API is running or update the API base URL in the config.
-
----
-
-## Author
-
-**Przemysław Pietkun**
-Junior Frontend Developer
-GitHub: [https://github.com/Silentmaster86](https://github.com/Silentmaster86)
-Portfolio: [https://silent86.netlify.app](https://silent86.netlify.app)
-
----
-
-This project is part of my journey transitioning into a professional frontend development role and showcases my practical React skills.
