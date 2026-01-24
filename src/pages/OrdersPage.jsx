@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { getOrders } from "../api/orders";
+import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
 
 const Wrap = styled.div`
   max-width: 900px;
@@ -81,12 +82,12 @@ const Dot = styled.span`
   height: 8px;
   border-radius: 999px;
   background: ${({ $tone }) => {
-    if ($tone === "success") return "rgba(34,197,94,0.95)"; // green
-    if ($tone === "info") return "rgba(59,130,246,0.95)"; // blue
-    if ($tone === "warn") return "rgba(245,158,11,0.95)"; // amber
-    if ($tone === "purple") return "rgba(168,85,247,0.95)"; // purple
-    if ($tone === "danger") return "rgba(220,38,38,0.95)"; // red
-    return "rgba(148,163,184,0.9)"; // gray
+    if ($tone === "success") return "rgba(34,197,94,0.95)";
+    if ($tone === "info") return "rgba(59,130,246,0.95)";
+    if ($tone === "warn") return "rgba(245,158,11,0.95)";
+    if ($tone === "purple") return "rgba(168,85,247,0.95)";
+    if ($tone === "danger") return "rgba(220,38,38,0.95)";
+    return "rgba(148,163,184,0.9)";
   }};
 `;
 
@@ -116,13 +117,11 @@ function formatDate(iso) {
 
 function statusMeta(status) {
   const s = String(status || "pending").toLowerCase();
-
   if (s === "delivered") return { label: "Delivered", tone: "success" };
   if (s === "shipped") return { label: "Shipped", tone: "purple" };
   if (s === "paid") return { label: "Paid", tone: "info" };
   if (s === "pending") return { label: "Pending", tone: "warn" };
   if (s === "cancelled") return { label: "Cancelled", tone: "danger" };
-
   return { label: s || "-", tone: "neutral" };
 }
 
@@ -133,6 +132,34 @@ function StatusBadge({ status }) {
       <Dot $tone={m.tone} />
       {m.label}
     </Badge>
+  );
+}
+
+function OrdersSkeletonList() {
+  return (
+    <div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "12px 0",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <div style={{ display: "grid", gap: 8, width: "60%" }}>
+            <SkeletonLine $h="14px" $w="45%" />
+            <SkeletonBlock $h="26px" $w="120px" $radius="999px" />
+          </div>
+          <div style={{ display: "grid", gap: 8, width: "35%", justifyItems: "end" }}>
+            <SkeletonLine $h="14px" $w="60%" />
+            <SkeletonLine $h="12px" $w="75%" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -200,7 +227,7 @@ export default function OrdersPage() {
           </ErrorBox>
         )}
 
-        {status === "loading" && <Muted>Loading…</Muted>}
+        {status === "loading" && <OrdersSkeletonList />}
 
         {status === "done" && sortedOrders.length === 0 && <Muted>No orders yet.</Muted>}
 

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Link, useParams } from "react-router-dom";
 import { getOrderById, updateOrderStatus } from "../api/orders";
 import OrderStatusTimeline from "../components/orders/OrderStatusTimeline";
+import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
 
 const Wrap = styled.div`
   max-width: 900px;
@@ -134,6 +135,64 @@ function nextStatus(current) {
   return STATUS_FLOW[Math.min(idx + 1, STATUS_FLOW.length - 1)];
 }
 
+function DetailsSkeleton() {
+  return (
+    <>
+      <div style={{ display: "grid", gap: 10, paddingTop: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "10px 0", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+          <SkeletonLine $h="12px" $w="20%" />
+          <SkeletonLine $h="12px" $w="30%" />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "10px 0", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+          <SkeletonLine $h="12px" $w="20%" />
+          <SkeletonLine $h="12px" $w="25%" />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "10px 0", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+          <SkeletonLine $h="12px" $w="20%" />
+          <SkeletonLine $h="12px" $w="40%" />
+        </div>
+
+        <div style={{ marginTop: 8 }}>
+          <SkeletonBlock $h="56px" $w="100%" $radius="14px" />
+        </div>
+
+        <SkeletonBlock $h="40px" $w="170px" $radius="14px" />
+      </div>
+
+      <div style={{ marginTop: 14 }}>
+        <SkeletonLine $h="12px" $w="18%" />
+        <div style={{ marginTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr auto auto",
+                gap: 12,
+                padding: "10px 0",
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <div style={{ display: "grid", gap: 8 }}>
+                <SkeletonLine $h="12px" $w="70%" />
+                <SkeletonLine $h="10px" $w="45%" />
+              </div>
+              <div style={{ display: "grid", gap: 8, justifyItems: "end" }}>
+                <SkeletonLine $h="12px" $w="60px" />
+                <SkeletonLine $h="10px" $w="30px" />
+              </div>
+              <div style={{ display: "grid", gap: 8, justifyItems: "end" }}>
+                <SkeletonLine $h="12px" $w="35px" />
+                <SkeletonLine $h="10px" $w="60px" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function OrderDetailsPage() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
@@ -190,7 +249,6 @@ export default function OrderDetailsPage() {
       const newStatus = nextStatus(order.status);
       const data = await updateOrderStatus(order.id, newStatus);
 
-      // zakładamy backend: { order: { ... } }
       setOrder(data?.order || order);
       setStatus("done");
     } catch (e) {
@@ -220,7 +278,7 @@ export default function OrderDetailsPage() {
 
       <Card>
         {status === "error" && <ErrorBox>{error}</ErrorBox>}
-        {status === "loading" && <Muted>Loading…</Muted>}
+        {status === "loading" && <DetailsSkeleton />}
 
         {status === "done" && !order && <Muted>Order not found.</Muted>}
 
@@ -241,10 +299,8 @@ export default function OrderDetailsPage() {
               <Val>{formatDateTime(order.created_at)}</Val>
             </Row>
 
-            {/* ✅ Timeline */}
             <OrderStatusTimeline status={order.status} />
 
-            {/* ✅ Demo control */}
             <GhostBtn
               type="button"
               onClick={handleAdvanceStatus}
@@ -255,9 +311,7 @@ export default function OrderDetailsPage() {
             </GhostBtn>
 
             <Table>
-              <Muted style={{ marginTop: 10, marginBottom: 6, fontWeight: 900 }}>
-                Items
-              </Muted>
+              <Muted style={{ marginTop: 10, marginBottom: 6, fontWeight: 900 }}>Items</Muted>
 
               {items.map((it, idx) => (
                 <Line key={`${it.product_id}-${idx}`}>

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchProducts } from "../api/products";
 import { useCart } from "../context/CartContext";
+import { ProductCardSkeletonContent } from "../components/ui/Skeletons";
 
 const Wrap = styled.div`
   max-width: 1100px;
@@ -206,7 +207,7 @@ export default function ProductsPage() {
   }, [category]);
 
   const visibleItems = useMemo(() => {
-    const list = items || [];
+    const list = Array.isArray(items) ? items : [];
     return category ? list.filter((p) => p.category_slug === category) : list;
   }, [items, category]);
 
@@ -223,16 +224,22 @@ export default function ProductsPage() {
         </div>
       </TitleRow>
 
-        <Chips>
-         {category && <Chip to="/products">🛒 All products</Chip>}
-         {CATS.filter((c) => !category || c.slug !== category).map((c) => (
-         <Chip key={c.slug} to={`/products?category=${c.slug}`}>
-          {c.label}
-         </Chip>
+      <Chips>
+        {category && <Chip to="/products">🛒 All products</Chip>}
+        {CATS.filter((c) => !category || c.slug !== category).map((c) => (
+          <Chip key={c.slug} to={`/products?category=${c.slug}`}>
+            {c.label}
+          </Chip>
         ))}
-        </Chips>
+      </Chips>
 
-      {items === null && !error && <div>Loading products…</div>}
+      {items === null && !error && (
+        <Grid>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ProductCardSkeletonContent key={i} />
+          ))}
+        </Grid>
+      )}
 
       {error && (
         <div style={{ color: "crimson" }}>
