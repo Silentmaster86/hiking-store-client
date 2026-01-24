@@ -1,7 +1,7 @@
 import { apiGet, apiRequest } from "./http";
 
 export function getMe() {
-  return apiGet("/auth/me");
+  return apiGet("/auth/me", { cache: "no-store" });
 }
 
 export function login({ email, password }) {
