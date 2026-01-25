@@ -140,6 +140,9 @@ These features are outside the scope of a Junior Frontend portfolio and would ad
 ### Products Page
 ![Products Page Screenshot](./src/assets/screenshots/products.png)
 
+### Category Boots
+![Category boots Page Screenshot](./src/assets/screenshots/category_boots.png)
+
 ### Cart Drawer
 ![Cart Drawer Screenshot](./src/assets/screenshots/cartDrawer.png)
 
