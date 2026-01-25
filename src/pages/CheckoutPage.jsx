@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { createCheckout } from "../api/checkout";
+import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
 
 const Wrap = styled.div`
   max-width: 760px;
@@ -52,12 +53,14 @@ const Label = styled.label`
 
 const Input = styled.input`
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   color: ${({ theme }) => theme.colors.text};
   border-radius: 12px;
   padding: 11px 12px;
   outline: none;
-  &:focus { box-shadow: 0 0 0 4px rgba(34,197,94,0.12); }
+  &:focus {
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+  }
 `;
 
 const Row = styled.div`
@@ -83,8 +86,13 @@ const Btn = styled.button`
   padding: 12px 12px;
   font-weight: 1100;
   cursor: pointer;
-  &:hover { opacity: 0.92; }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:hover {
+    opacity: 0.92;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 const Muted = styled.div`
@@ -97,9 +105,46 @@ function formatPrice(cents) {
   return `£${v}`;
 }
 
+function CheckoutSkeleton() {
+  return (
+    <div style={{ display: "grid", gap: 14 }}>
+      {/* summary line */}
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+        <SkeletonLine $h="12px" $w="45%" />
+        <SkeletonLine $h="12px" $w="28%" />
+      </div>
+
+      {/* form skeleton */}
+      <div style={{ display: "grid", gap: 12 }}>
+        <div
+          style={{
+            display: "grid",
+            gap: 12,
+            gridTemplateColumns: "1fr",
+          }}
+        >
+          <Grid>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} style={{ display: "grid", gap: 6 }}>
+                <SkeletonLine $h="10px" $w="40%" />
+                <SkeletonBlock $h="42px" $w="100%" $radius="12px" />
+              </div>
+            ))}
+          </Grid>
+        </div>
+
+        <SkeletonBlock $h="44px" $w="100%" $radius="14px" />
+        <SkeletonLine $h="10px" $w="70%" />
+      </div>
+    </div>
+  );
+}
+
 export default function CheckoutPage() {
   const nav = useNavigate();
-  const { items, totalCents, refresh } = useCart();
+
+  // ✅ bierzemy też status/error z cart (jak w CartDrawer)
+  const { items, totalCents, refresh, status: cartStatus, error: cartError } = useCart();
 
   const [form, setForm] = useState({
     email: "",
@@ -115,12 +160,16 @@ export default function CheckoutPage() {
   const [status, setStatus] = useState("idle"); // idle | submitting
   const [error, setError] = useState("");
 
+  const cartLoading = cartStatus === "loading";
+  const submitting = status === "submitting";
+
   const canSubmit = useMemo(() => {
+    if (cartLoading) return false;
     if (items.length === 0) return false;
-    if (!form.email.trim()) return false; // guest checkout wymaga email (backend)
+    if (!form.email.trim()) return false;
     if (!form.address1.trim() || !form.city.trim() || !form.postcode.trim()) return false;
     return true;
-  }, [items.length, form]);
+  }, [cartLoading, items.length, form]);
 
   function onChange(e) {
     const { name, value } = e.target;
@@ -149,13 +198,11 @@ export default function CheckoutPage() {
       const data = await createCheckout(payload);
       const orderId = data?.order?.id;
 
-      // odśwież cart (backend usuwa cart_items po checkout)
       await refresh?.();
 
       if (!orderId) throw new Error("Checkout succeeded but no order id returned.");
       nav(`/order/${orderId}/confirmation`, { replace: true, state: { order: data.order } });
     } catch (err) {
-      // mapuj "Failed to fetch" na user-friendly
       const msg =
         err?.message === "Failed to fetch"
           ? "Cannot connect to the server. Please try again in a moment."
@@ -174,71 +221,137 @@ export default function CheckoutPage() {
       <Sub>Complete your order in one step.</Sub>
 
       <Card>
-        {items.length === 0 ? (
-          <Muted>Your cart is empty. Add items from Products first.</Muted>
+        {/* ✅ Skeleton jeśli cart jeszcze się ładuje i nie ma items */}
+        {cartLoading && items.length === 0 ? (
+          <CheckoutSkeleton />
         ) : (
-          <Muted>
-            Items: <b>{items.length}</b> · Total: <b>{formatPrice(totalCents)}</b>
-          </Muted>
+          <>
+            {/* cart error (opcjonalnie) */}
+            {cartStatus === "error" && (
+              <ErrorBox>{cartError || "Cannot load cart right now."}</ErrorBox>
+            )}
+
+            {items.length === 0 ? (
+              <Muted>Your cart is empty. Add items from Products first.</Muted>
+            ) : (
+              <Muted>
+                Items: <b>{items.length}</b> · Total: <b>{formatPrice(totalCents)}</b>
+              </Muted>
+            )}
+
+            <form onSubmit={onSubmit}>
+              <fieldset
+                disabled={submitting || cartLoading || items.length === 0}
+                style={{ border: 0, padding: 0, margin: 0 }}
+              >
+                <Row>
+                  {error && <ErrorBox>{error}</ErrorBox>}
+
+                  <Grid>
+                    <Field>
+                      <Label htmlFor="email">Email (required)</Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        value={form.email}
+                        onChange={onChange}
+                        placeholder="you@example.com"
+                      />
+                    </Field>
+
+                    <Field>
+                      <Label htmlFor="firstName">First name</Label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        autoComplete="given-name"
+                        value={form.firstName}
+                        onChange={onChange}
+                      />
+                    </Field>
+
+                    <Field>
+                      <Label htmlFor="lastName">Last name</Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        autoComplete="family-name"
+                        value={form.lastName}
+                        onChange={onChange}
+                      />
+                    </Field>
+
+                    <Field>
+                      <Label htmlFor="address1">Address line 1 (required)</Label>
+                      <Input
+                        id="address1"
+                        name="address1"
+                        required
+                        autoComplete="address-line1"
+                        value={form.address1}
+                        onChange={onChange}
+                      />
+                    </Field>
+
+                    <Field>
+                      <Label htmlFor="address2">Address line 2</Label>
+                      <Input
+                        id="address2"
+                        name="address2"
+                        autoComplete="address-line2"
+                        value={form.address2}
+                        onChange={onChange}
+                      />
+                    </Field>
+
+                    <Field>
+                      <Label htmlFor="city">City (required)</Label>
+                      <Input
+                        id="city"
+                        name="city"
+                        required
+                        autoComplete="address-level2"
+                        value={form.city}
+                        onChange={onChange}
+                      />
+                    </Field>
+
+                    <Field>
+                      <Label htmlFor="postcode">Postcode (required)</Label>
+                      <Input
+                        id="postcode"
+                        name="postcode"
+                        autoComplete="postal-code"
+                        value={form.postcode}
+                        onChange={onChange}
+                      />
+                    </Field>
+
+                    <Field>
+                      <Label htmlFor="country">Country</Label>
+                      <Input
+                        id="country"
+                        name="country"
+                        autoComplete="country-name"
+                        value={form.country}
+                        onChange={onChange}
+                      />
+                    </Field>
+                  </Grid>
+
+                  <Btn type="submit" disabled={!canSubmit || submitting}>
+                    {submitting ? "Placing order…" : "Place order"}
+                  </Btn>
+
+                  <Muted>After placing your order, you’ll see a confirmation screen with order details.</Muted>
+                </Row>
+              </fieldset>
+            </form>
+          </>
         )}
-
-        <form onSubmit={onSubmit}>
-          <fieldset disabled={status === "submitting"} style={{ border: 0, padding: 0, margin: 0 }}>  
-          <Row>
-            {error && <ErrorBox>{error}</ErrorBox>}
-
-            <Grid>
-              <Field>
-                <Label htmlFor="email">Email (required)</Label>
-                <Input id="email" name="email" type="email" required autoComplete="email" value={form.email} onChange={onChange} placeholder="you@example.com" />
-              </Field>
-
-              <Field>
-                <Label htmlFor="firstName">First name</Label>
-                <Input id="firstName" name="firstName" autoComplete="given-name" value={form.firstName} onChange={onChange} />
-              </Field>
-
-              <Field>
-                <Label htmlFor="lastName">Last name</Label>
-                <Input id="lastName" name="lastName" autoComplete="family-name" value={form.lastName} onChange={onChange} />
-              </Field>
-
-              <Field>
-                <Label htmlFor="address1">Address line 1 (required)</Label>
-                <Input id="address1" name="address1" required autoComplete="address-line1" value={form.address1} onChange={onChange} />
-              </Field>
-
-              <Field>
-                <Label htmlFor="address2">Address line 2</Label>
-                <Input id="address2" name="address2" autoComplete="address-line2" value={form.address2} onChange={onChange} />
-              </Field>
-
-              <Field>
-                <Label htmlFor="city">City (required)</Label>
-                <Input id="city" name="city" required autoComplete="address-level2" value={form.city} onChange={onChange} />
-              </Field>
-
-              <Field>
-                <Label htmlFor="postcode">Postcode (required)</Label>
-                <Input id="postcode" name="postcode" autoComplete="postal-code" value={form.postcode} onChange={onChange} />
-              </Field>
-
-              <Field>
-                <Label htmlFor="country">Country</Label>
-                <Input id="country" name="country" autoComplete="country-name" value={form.country} onChange={onChange} />
-              </Field>
-            </Grid>
-
-            <Btn type="submit" disabled={!canSubmit || status === "submitting"}>
-              {status === "submitting" ? "Placing order…" : "Place order"}
-            </Btn>
-
-            <Muted>
-              After placing your order, you’ll see a confirmation screen with order details.
-            </Muted>
-          </Row>
-          </fieldset>
-        </form>
       </Card>
     </Wrap>
   );

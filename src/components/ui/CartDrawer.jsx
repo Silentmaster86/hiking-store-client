@@ -2,12 +2,12 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useCart } from "../../context/CartContext.jsx";
-
+import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
 
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   z-index: 50;
   opacity: ${({ $open }) => ($open ? 1 : 0)};
   pointer-events: ${({ $open }) => ($open ? "auto" : "none")};
@@ -20,14 +20,14 @@ const Panel = styled.aside`
   right: 0;
   height: 100vh;
 
-  width: min(420px, 92vw); /* desktop default */
+  width: min(420px, 92vw);
 
   @media (max-width: 520px) {
-  width: min(340px, 88vw);
+    width: min(340px, 88vw);
   }
 
   @media (max-width: 480px) {
-    width: min(340px, 88vw); /* smaller on phones */
+    width: min(340px, 88vw);
   }
 
   z-index: 60;
@@ -40,7 +40,7 @@ const Panel = styled.aside`
   backdrop-filter: blur(12px);
 
   @media (max-width: 380px) {
-  width: min(320px, 90vw);
+    width: min(320px, 90vw);
   }
 `;
 
@@ -65,20 +65,22 @@ const Tag = styled.span`
   font-weight: 900;
   color: ${({ theme }) => theme.colors.muted};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   padding: 6px 10px;
   border-radius: 999px;
 `;
 
 const CloseBtn = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   color: ${({ theme }) => theme.colors.text};
   border-radius: 12px;
   padding: 10px 12px;
   cursor: pointer;
   font-weight: 900;
-  &:hover { background: rgba(255,255,255,0.06); }
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 `;
 
 const List = styled.div`
@@ -89,7 +91,7 @@ const List = styled.div`
 
 const Row = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 16px;
   padding: 12px;
   display: grid;
@@ -134,12 +136,17 @@ const QtyBtn = styled.button`
   height: 34px;
   border-radius: 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   color: ${({ theme }) => theme.colors.text};
   font-weight: 1000;
   cursor: pointer;
-  &:hover { background: rgba(255,255,255,0.06); }
-  &:disabled { opacity: 0.55; cursor: not-allowed; }
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 `;
 
 const QtyVal = styled.div`
@@ -154,14 +161,19 @@ const Remove = styled.button`
   color: ${({ theme }) => theme.colors.muted};
   font-weight: 900;
   cursor: pointer;
-  &:hover { color: ${({ theme }) => theme.colors.text}; }
-  &:disabled { opacity: 0.55; cursor: not-allowed; }
+  &:hover {
+    color: ${({ theme }) => theme.colors.text};
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 `;
 
 const Foot = styled.div`
   padding: 10px 12px;
   border-top: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(0,0,0,0.12);
+  background: rgba(0, 0, 0, 0.12);
 `;
 
 const TotalRow = styled.div`
@@ -191,8 +203,13 @@ const CTA = styled.button`
   padding: 12px 12px;
   font-weight: 1100;
   cursor: pointer;
-  &:hover { opacity: 0.92; }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:hover {
+    opacity: 0.92;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 const Small = styled.div`
@@ -207,9 +224,62 @@ function formatPrice(cents) {
   return `£${v}`;
 }
 
+function CartSkeleton() {
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "64px 1fr",
+            gap: 12,
+            padding: "10px 0",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <SkeletonBlock $h="56px" $w="64px" $radius="12px" />
+          <div style={{ display: "grid", gap: 8 }}>
+            <SkeletonLine $h="12px" $w="70%" />
+            <SkeletonLine $h="10px" $w="45%" />
+            <div style={{ display: "flex", gap: 10, marginTop: 2 }}>
+              <SkeletonBlock $h="28px" $w="90px" $radius="12px" />
+              <SkeletonBlock $h="28px" $w="70px" $radius="12px" />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      <div style={{ display: "grid", gap: 10, marginTop: 6 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+          <SkeletonLine $h="12px" $w="30%" />
+          <SkeletonLine $h="12px" $w="22%" />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+          <SkeletonLine $h="12px" $w="38%" />
+          <SkeletonLine $h="12px" $w="26%" />
+        </div>
+        <SkeletonBlock $h="42px" $w="100%" $radius="14px" />
+      </div>
+    </div>
+  );
+}
+
 export default function CartDrawer() {
-  const { open, closeCart, items, status, error, refresh, setQty, removeItem, totalCents } = useCart();
+  const {
+    open,
+    closeCart,
+    items,
+    status,
+    error,
+    refresh,
+    setQty,
+    removeItem,
+    totalCents,
+  } = useCart();
+
   const nav = useNavigate();
+
   useEffect(() => {
     if (open) refresh?.();
   }, [open, refresh]);
@@ -230,15 +300,18 @@ export default function CartDrawer() {
         </Head>
 
         <List>
-          {status === "error" && (
-            <ErrorBox>
-              {error || "Cart error"}
-            </ErrorBox>
+          {status === "error" && <ErrorBox>{error || "Cart error"}</ErrorBox>}
+
+          {/* ✅ Skeleton gdy jeszcze nie mamy items */}
+          {busy && items.length === 0 && <CartSkeleton />}
+
+          {/* Empty state dopiero gdy NIE loading */}
+          {!busy && items.length === 0 && (
+            <Muted>Your cart is empty. Add something from Products.</Muted>
           )}
 
-          {items.length === 0 ? (
-            <Muted>{busy ? "Loading cart…" : "Your cart is empty. Add something from Products."}</Muted>
-          ) : (
+          {/* Items */}
+          {items.length > 0 &&
             items.map((it) => {
               const id = it.cart_item_id;
               return (
@@ -270,8 +343,7 @@ export default function CartDrawer() {
                   </Controls>
                 </Row>
               );
-            })
-          )}
+            })}
         </List>
 
         <Foot>
@@ -290,7 +362,6 @@ export default function CartDrawer() {
           >
             Checkout
           </CTA>
-
 
           <Small>This cart is stored in a server session (guest cart).</Small>
         </Foot>

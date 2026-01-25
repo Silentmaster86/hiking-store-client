@@ -1,8 +1,15 @@
-# Hiking Store — Junior Frontend Portfolio Project
+# Hiking Store — Portfolio Project — React E-commerce Frontend
 
 A modern **e-commerce web application** built as a **portfolio project for a Junior Frontend Developer role**.
 
 This project simulates a real-world online store and focuses on demonstrating **frontend engineering skills**, clean architecture, API integration, and UX best practices — while intentionally avoiding overengineering.
+
+## Architecture
+
+* React SPA with REST API backend
+* Server-side sessions for cart & auth
+* Frontend focused on UX, async state handling, and clean separation of concerns
+
 
 👉 Live demo:  
 https://hiking-store-uk.netlify.app
@@ -143,6 +150,45 @@ These features are outside the scope of a Junior Frontend portfolio and would ad
 ![Order Confirmation Screenshot](./src/assets/screenshots/order_confirmation.png)
 
 ---
+
+
+## Environment Variables
+
+The frontend expects the following environment variables:
+
+```env
+VITE_API_URL=https://your-backend-api-url
+
+## Example
+VITE_API_URL=http://localhost:5000
+
+---
+
+## B) API & Sessions (ważne przy cart)
+
+Dodaj krótką sekcję:
+
+```md
+## Sessions & Cookies
+
+This application uses **server-side sessions and cookies** for:
+
+* Guest carts
+* Authenticated user carts
+* Authentication state
+
+Because of this:
+
+* Cookies must be enabled
+* The app requires an active backend connection
+* Offline checkout is not supported
+
+## Known Limitations
+
+* Checkout requires an active backend connection
+* Cart is stored in server session (not localStorage)
+* Offline mode is limited (no offline checkout)
+* Payments are not implemented (portfolio scope)
 
 ## How to Run Locally
 
