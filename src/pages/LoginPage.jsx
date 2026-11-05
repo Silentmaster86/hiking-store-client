@@ -149,7 +149,7 @@ padding: 12px 0;
             
 export default function LoginPage() {
     
-  const API = import.meta.env.VITE_API_URL;
+  const API = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
   
   
   const { login } = useAuth();
@@ -213,12 +213,12 @@ export default function LoginPage() {
         </form>
         <Divider>or</Divider>
 
-        <OAuthBtn href={`${API}/auth/google`}>
+        <OAuthBtn href={`${API}/auth/google?returnTo=${encodeURIComponent(from)}`}>
           <OAuthIcon>🌐</OAuthIcon>
           Continue with Google
         </OAuthBtn>
 
-        <OAuthBtn href={`${API}/auth/facebook`}>
+        <OAuthBtn href={`${API}/auth/facebook?returnTo=${encodeURIComponent(from)}`}>
           <OAuthIcon>📘</OAuthIcon>
           Continue with Facebook
         </OAuthBtn>

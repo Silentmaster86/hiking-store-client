@@ -40,6 +40,7 @@ async function scenario(browser, run) {
     await route.fulfill(fs.existsSync(filename) ? { body: fs.readFileSync(filename), contentType: mime } : { status: 404, body: "" });
   });
   try { await run(page, fixture); assert.deepEqual(errors, [], "No unhandled browser errors"); }
+  catch (error) { console.error("Fixture checkout posts:", fixture.posts, "Browser errors:", errors); console.error(await page.locator("main").innerText()); throw error; }
   finally { await context.close(); }
 }
 async function fillCheckout(page) {
@@ -49,7 +50,7 @@ async function fillCheckout(page) {
   const browser = await chromium.launch({ headless: true });
   try {
     await scenario(browser, async (page, fixture) => {
-      await page.goto("http://hiking.test/checkout");
+      await page.goto("https://hiking.test/checkout");
       await page.getByRole("button", { name: "Place demo order" }).click();
       await page.locator("#email-error").waitFor();
       assert.equal(fixture.posts, 0, "Invalid form cannot send checkout");
@@ -65,19 +66,21 @@ async function fillCheckout(page) {
       await page.getByRole("link", { name: "Sign in to save this order to your account" }).click();
       await page.locator("#email").fill("buyer@example.com");
       await page.locator("#password").fill("test password");
+      const oauth = await page.getByRole("link", { name: "Continue with Google" }).getAttribute("href");
+      assert.equal(new URL(oauth, "https://hiking.test").searchParams.get("returnTo"), "/order/1/confirmation");
       await page.getByRole("button", { name: "Sign in", exact: true }).click();
       await page.getByRole("button", { name: "Save order to my account" }).click();
       await page.getByRole("button", { name: "Save order to my account" }).waitFor({ state: "hidden" });
       assert.equal(fixture.claimed, true);
       await page.getByRole("link", { name: "View full order details" }).click();
       await page.getByRole("heading", { name: "Order #1", exact: true }).waitFor();
-      await page.goto("http://hiking.test/order/999/confirmation");
+      await page.goto("https://hiking.test/order/999/confirmation");
       await page.getByRole("heading", { name: "We couldn’t display this order" }).waitFor();
       assert.equal(await page.getByRole("heading", { name: "Order confirmed", exact: true }).count(), 0);
     });
     console.log("PASS: validation, retry key, confirmation reload, guest claim and unavailable order UI");
     await scenario(browser, async (page, fixture) => {
-      await page.goto("http://hiking.test/checkout"); await fillCheckout(page);
+      await page.goto("https://hiking.test/checkout"); await fillCheckout(page);
       await page.getByRole("button", { name: "Place demo order" }).click();
       await page.getByRole("alert").filter({ hasText: "Retry to safely check" }).waitFor();
       await page.reload();
@@ -86,7 +89,7 @@ async function fillCheckout(page) {
     });
     console.log("PASS: lost response followed by reload recovers the completed order");
     await scenario(browser, async (page) => {
-      await page.goto("http://hiking.test/register");
+      await page.goto("https://hiking.test/register");
       await page.locator("#email").fill("buyer@example.com"); await page.locator("#password").fill("x");
       await page.getByRole("button", { name: "Create account", exact: true }).click();
       await page.locator("#password-error").waitFor();
