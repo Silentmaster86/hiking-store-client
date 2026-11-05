@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useCart } from "../../context/CartContext.jsx";
-import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
+import { SkeletonLine, SkeletonBlock } from "./Skeletons";
 
 const Overlay = styled.div`
   position: fixed;
