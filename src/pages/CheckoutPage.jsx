@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/cart-context";
 import { createCheckout } from "../api/checkout";
 import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
 
@@ -160,16 +160,16 @@ export default function CheckoutPage() {
   const [status, setStatus] = useState("idle"); // idle | submitting
   const [error, setError] = useState("");
 
-  const cartLoading = cartStatus === "loading";
+  const cartLoading = cartStatus === "loading" || cartStatus === "saving";
   const submitting = status === "submitting";
 
   const canSubmit = useMemo(() => {
-    if (cartLoading) return false;
+    if (cartStatus !== "done") return false;
     if (items.length === 0) return false;
     if (!form.email.trim()) return false;
     if (!form.address1.trim() || !form.city.trim() || !form.postcode.trim()) return false;
     return true;
-  }, [cartLoading, items.length, form]);
+  }, [cartStatus, items.length, form]);
 
   function onChange(e) {
     const { name, value } = e.target;
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
           <>
             {/* cart error (opcjonalnie) */}
             {cartStatus === "error" && (
-              <ErrorBox>{cartError || "Cannot load cart right now."}</ErrorBox>
+              <ErrorBox>{cartError || "Cannot load cart right now."}<button type="button" onClick={refresh}>Refresh cart</button></ErrorBox>
             )}
 
             {items.length === 0 ? (

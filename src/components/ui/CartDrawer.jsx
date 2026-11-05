@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useCart } from "../../context/CartContext.jsx";
+import { useCart } from "../../context/cart-context";
 import { SkeletonLine, SkeletonBlock } from "./Skeletons";
 
 const Overlay = styled.div`
@@ -281,15 +281,18 @@ export default function CartDrawer() {
   const nav = useNavigate();
 
   useEffect(() => {
-    if (open) refresh?.();
-  }, [open, refresh]);
+    if (!open) return;
+    const handleKey = (event) => { if (event.key === "Escape") closeCart(); };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open, closeCart]);
 
-  const busy = status === "loading";
+  const busy = status === "loading" || status === "saving";
 
   return (
     <>
       <Overlay $open={open} onClick={closeCart} />
-      <Panel $open={open} aria-hidden={!open}>
+      <Panel $open={open} aria-hidden={!open} inert={!open}>
         <Head>
           <Title>
             Cart {busy && <Tag>Syncing…</Tag>}
@@ -300,7 +303,7 @@ export default function CartDrawer() {
         </Head>
 
         <List>
-          {status === "error" && <ErrorBox>{error || "Cart error"}</ErrorBox>}
+          {status === "error" && <ErrorBox>{error || "Cart error"}<button type="button" onClick={refresh}>Refresh cart</button></ErrorBox>}
 
           {/* ✅ Skeleton gdy jeszcze nie mamy items */}
           {busy && items.length === 0 && <CartSkeleton />}
@@ -358,7 +361,7 @@ export default function CartDrawer() {
               closeCart();
               nav("/checkout");
             }}
-            disabled={items.length === 0 || busy}
+            disabled={items.length === 0 || busy || status === "error"}
           >
             Checkout
           </CTA>

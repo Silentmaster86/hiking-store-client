@@ -1,45 +1,31 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
-if (!API_URL) {
-  console.warn("Missing VITE_API_URL. Set it in Netlify / .env.local");
-}
-
-async function parseResponse(res) {
-  const text = await res.text().catch(() => "");
-  if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-}
+const API_URL = (import.meta.env?.VITE_API_URL || "/api").replace(/\/$/, "");
 
 export async function apiRequest(path, options = {}) {
   const res = await fetch(`${API_URL}${path}`, {
     credentials: "include",
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...(options.headers || {}),
     },
   });
-
-  if (!res.ok) {
-    const data = await parseResponse(res);
-
-    if (res.status === 401) {
-      throw new Error("Unauthorized");
-    }
-
-    const msg =
-      (data && (data.error || data.message)) ||
-      `${options.method || "GET"} ${path} failed: ${res.status}`;
-    throw new Error(msg);
+  const text = await res.text();
+  let data = null;
+  if (text) {
+    try { data = JSON.parse(text); }
+    catch { if (res.ok) throw new Error("The server returned an unexpected response."); }
   }
-
-  return parseResponse(res);
+  if (!res.ok) {
+    const error = new Error(res.status === 401 ? "Unauthorized"
+      : data?.error || data?.message || "The request could not be completed. Please try again.");
+    error.status = res.status;
+    error.code = data?.code;
+    error.fieldErrors = data?.fieldErrors;
+    throw error;
+  }
+  return data;
 }
 
-export async function apiGet(path, options = {}) {
-  return apiRequest(path, { method: "GET", ...options });
+export function apiGet(path, options = {}) {
+  return apiRequest(path, { ...options, method: "GET" });
 }
