@@ -213,7 +213,7 @@ export default function OrdersPage() {
   return (
     <Wrap>
       <H1>Your orders</H1>
-      <Sub>Available after login. If you checked out as a guest, you can claim an order later.</Sub>
+      <Sub>Guest orders can be saved from their confirmation page using the same browser in which you placed them.</Sub>
 
       <Card>
         {status === "error" && (

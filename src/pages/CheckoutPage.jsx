@@ -1,358 +1,116 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/cart-context";
-import { createCheckout } from "../api/checkout";
-import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
-
-const Wrap = styled.div`
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 12px 0;
+import { useAuth } from "../context/auth-context";
+import { createCheckout, getCheckoutAttempt } from "../api/checkout";
+import { checkoutPayload, validateCheckout, localFieldErrors } from "../validation/checkout";
+import { money } from "../utils/orderFormatting";
+const Wrap = styled.section`
+  max-width: 760px; margin: 0 auto;
+  form { border: 1px solid ${({ theme }) => theme.colors.border}; background: ${({ theme }) => theme.colors.surface}; border-radius: 18px; padding: 18px; }
+  fieldset { padding: 0; margin: 0; border: 0; }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  label { display: grid; gap: 6px; font-weight: 700; }
+  input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid ${({ theme }) => theme.colors.border}; background: rgba(0,0,0,.2); color: inherit; font-size: 16px; }
+  [aria-invalid="true"] { border-color: #fca5a5; }
+  .error { color: #fca5a5; font-size: 14px; }
+  button { padding: 12px 16px; margin-top: 14px; border: 0; border-radius: 10px; background: ${({ theme }) => theme.colors.primary}; color: ${({ theme }) => theme.colors.primaryText}; cursor: pointer; font-weight: 800; }
+  button:disabled { opacity: .6; cursor: not-allowed; }
+  @media(max-width: 600px) { .fields { grid-template-columns: 1fr; } }
 `;
-
-const H1 = styled.h1`
-  margin: 0 0 6px;
-  font-size: 28px;
-  letter-spacing: -0.5px;
-`;
-
-const Sub = styled.p`
-  margin: 0 0 18px;
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
-const Card = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.surface};
-  border-radius: 18px;
-  padding: 14px;
-  box-shadow: ${({ theme }) => theme.shadows.soft};
-`;
-
-const Grid = styled.div`
-  display: grid;
-  gap: 12px;
-  grid-template-columns: 1fr;
-
-  @media (min-width: 720px) {
-    grid-template-columns: 1fr 1fr;
-  }
-`;
-
-const Field = styled.div`
-  display: grid;
-  gap: 6px;
-`;
-
-const Label = styled.label`
-  font-size: 13px;
-  font-weight: 900;
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
-const Input = styled.input`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255, 255, 255, 0.03);
-  color: ${({ theme }) => theme.colors.text};
-  border-radius: 12px;
-  padding: 11px 12px;
-  outline: none;
-  &:focus {
-    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
-  }
-`;
-
-const Row = styled.div`
-  display: grid;
-  gap: 12px;
-  margin-top: 12px;
-`;
-
-const ErrorBox = styled.div`
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  background: rgba(220, 38, 38, 0.08);
-  color: rgba(220, 38, 38, 0.95);
-  border-radius: 14px;
-  padding: 10px 12px;
-  font-weight: 800;
-`;
-
-const Btn = styled.button`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.primary};
-  color: #03130f;
-  border-radius: 14px;
-  padding: 12px 12px;
-  font-weight: 1100;
-  cursor: pointer;
-  &:hover {
-    opacity: 0.92;
-  }
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
-const Muted = styled.div`
-  color: ${({ theme }) => theme.colors.muted};
-  font-size: 13px;
-`;
-
-function formatPrice(cents) {
-  const v = (Number(cents || 0) / 100).toFixed(2);
-  return `£${v}`;
-}
-
-function CheckoutSkeleton() {
-  return (
-    <div style={{ display: "grid", gap: 14 }}>
-      {/* summary line */}
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <SkeletonLine $h="12px" $w="45%" />
-        <SkeletonLine $h="12px" $w="28%" />
-      </div>
-
-      {/* form skeleton */}
-      <div style={{ display: "grid", gap: 12 }}>
-        <div
-          style={{
-            display: "grid",
-            gap: 12,
-            gridTemplateColumns: "1fr",
-          }}
-        >
-          <Grid>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} style={{ display: "grid", gap: 6 }}>
-                <SkeletonLine $h="10px" $w="40%" />
-                <SkeletonBlock $h="42px" $w="100%" $radius="12px" />
-              </div>
-            ))}
-          </Grid>
-        </div>
-
-        <SkeletonBlock $h="44px" $w="100%" $radius="14px" />
-        <SkeletonLine $h="10px" $w="70%" />
-      </div>
-    </div>
-  );
-}
-
+const fields = [
+  ["email", "Email", "email", "email", 254], ["firstName", "First name", "text", "given-name", 80],
+  ["lastName", "Last name", "text", "family-name", 80], ["address1", "Address line 1", "text", "address-line1", 200],
+  ["address2", "Address line 2 (optional)", "text", "address-line2", 200], ["city", "Town or city", "text", "address-level2", 200],
+  ["postcode", "Postcode", "text", "postal-code", 12],
+];
 export default function CheckoutPage() {
   const nav = useNavigate();
-
-  // ✅ bierzemy też status/error z cart (jak w CartDrawer)
+  const { user } = useAuth();
   const { items, totalCents, refresh, status: cartStatus, error: cartError } = useCart();
-
-  const [form, setForm] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    address1: "",
-    address2: "",
-    city: "",
-    postcode: "",
-    country: "UK",
-  });
-
-  const [status, setStatus] = useState("idle"); // idle | submitting
+  const [form, setForm] = useState(() => ({ email: user?.email || "", firstName: user?.firstName || "", lastName: user?.lastName || "", address1: "", address2: "", city: "", postcode: "", country: "GB" }));
+  const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
-
-  const cartLoading = cartStatus === "loading" || cartStatus === "saving";
-  const submitting = status === "submitting";
-
-  const canSubmit = useMemo(() => {
-    if (cartStatus !== "done") return false;
-    if (items.length === 0) return false;
-    if (!form.email.trim()) return false;
-    if (!form.address1.trim() || !form.city.trim() || !form.postcode.trim()) return false;
-    return true;
-  }, [cartStatus, items.length, form]);
-
-  function onChange(e) {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-  }
-
-  async function onSubmit(e) {
-    e.preventDefault();
-    setError("");
-    setStatus("submitting");
-
-    try {
-      const payload = {
-        email: form.email.trim(),
-        firstName: form.firstName.trim() || null,
-        lastName: form.lastName.trim() || null,
-        shipping: {
-          address1: form.address1.trim(),
-          address2: form.address2.trim() || null,
-          city: form.city.trim(),
-          postcode: form.postcode.trim(),
-          country: form.country.trim() || "UK",
-        },
-      };
-
-      const data = await createCheckout(payload);
-      const orderId = data?.order?.id;
-
-      await refresh?.();
-
-      if (!orderId) throw new Error("Checkout succeeded but no order id returned.");
-      nav(`/order/${orderId}/confirmation`, { replace: true, state: { order: data.order } });
-    } catch (err) {
-      const msg =
-        err?.message === "Failed to fetch"
-          ? "Cannot connect to the server. Please try again in a moment."
-          : err?.status === 401
-          ? "Your session expired. Please refresh the page and try again."
-          : err?.message || "Checkout failed.";
-
-      setError(msg);
-      setStatus("idle");
+  const [submitting, setSubmitting] = useState(false);
+  const busy = useRef(false);
+  const key = useRef(null);
+  const storageKey = `checkout-attempt:${user?.id || "guest"}`;
+  useEffect(() => {
+    let pending;
+    try { pending = sessionStorage.getItem(storageKey); } catch { return; }
+    if (!pending) return;
+    const controller = new AbortController();
+    getCheckoutAttempt(pending, { signal: controller.signal }).then((data) => {
+      if (controller.signal.aborted || !data?.order?.id) return;
+      try { sessionStorage.removeItem(storageKey); } catch { /* Storage can be disabled. */ }
+      nav(`/order/${data.order.id}/confirmation`, { replace: true });
+      void refresh();
+    }).catch(() => { /* An unfinished attempt remains available for a safe retry. */ });
+    return () => controller.abort();
+  }, [storageKey, nav, refresh]);
+  const canSubmit = cartStatus === "done" && items.length > 0 && !submitting;
+  function attemptKey() {
+    if (!key.current) {
+      try { key.current = sessionStorage.getItem(`checkout-attempt:${user?.id || "guest"}`); } catch { /* Storage can be disabled. */ }
+      key.current ||= crypto.randomUUID();
+      try { sessionStorage.setItem(`checkout-attempt:${user?.id || "guest"}`, key.current); } catch { /* In-memory retry still works. */ }
     }
+    return key.current;
   }
-
-  return (
-    <Wrap>
-      <H1>Checkout</H1>
-      <Sub>Complete your order in one step.</Sub>
-
-      <Card>
-        {/* ✅ Skeleton jeśli cart jeszcze się ładuje i nie ma items */}
-        {cartLoading && items.length === 0 ? (
-          <CheckoutSkeleton />
-        ) : (
-          <>
-            {/* cart error (opcjonalnie) */}
-            {cartStatus === "error" && (
-              <ErrorBox>{cartError || "Cannot load cart right now."}<button type="button" onClick={refresh}>Refresh cart</button></ErrorBox>
-            )}
-
-            {items.length === 0 ? (
-              <Muted>Your cart is empty. Add items from Products first.</Muted>
-            ) : (
-              <Muted>
-                Items: <b>{items.length}</b> · Total: <b>{formatPrice(totalCents)}</b>
-              </Muted>
-            )}
-
-            <form onSubmit={onSubmit}>
-              <fieldset
-                disabled={submitting || cartLoading || items.length === 0}
-                style={{ border: 0, padding: 0, margin: 0 }}
-              >
-                <Row>
-                  {error && <ErrorBox>{error}</ErrorBox>}
-
-                  <Grid>
-                    <Field>
-                      <Label htmlFor="email">Email (required)</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        required
-                        autoComplete="email"
-                        value={form.email}
-                        onChange={onChange}
-                        placeholder="you@example.com"
-                      />
-                    </Field>
-
-                    <Field>
-                      <Label htmlFor="firstName">First name</Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        autoComplete="given-name"
-                        value={form.firstName}
-                        onChange={onChange}
-                      />
-                    </Field>
-
-                    <Field>
-                      <Label htmlFor="lastName">Last name</Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        autoComplete="family-name"
-                        value={form.lastName}
-                        onChange={onChange}
-                      />
-                    </Field>
-
-                    <Field>
-                      <Label htmlFor="address1">Address line 1 (required)</Label>
-                      <Input
-                        id="address1"
-                        name="address1"
-                        required
-                        autoComplete="address-line1"
-                        value={form.address1}
-                        onChange={onChange}
-                      />
-                    </Field>
-
-                    <Field>
-                      <Label htmlFor="address2">Address line 2</Label>
-                      <Input
-                        id="address2"
-                        name="address2"
-                        autoComplete="address-line2"
-                        value={form.address2}
-                        onChange={onChange}
-                      />
-                    </Field>
-
-                    <Field>
-                      <Label htmlFor="city">City (required)</Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        required
-                        autoComplete="address-level2"
-                        value={form.city}
-                        onChange={onChange}
-                      />
-                    </Field>
-
-                    <Field>
-                      <Label htmlFor="postcode">Postcode (required)</Label>
-                      <Input
-                        id="postcode"
-                        name="postcode"
-                        autoComplete="postal-code"
-                        value={form.postcode}
-                        onChange={onChange}
-                      />
-                    </Field>
-
-                    <Field>
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        name="country"
-                        autoComplete="country-name"
-                        value={form.country}
-                        onChange={onChange}
-                      />
-                    </Field>
-                  </Grid>
-
-                  <Btn type="submit" disabled={!canSubmit || submitting}>
-                    {submitting ? "Placing order…" : "Place order"}
-                  </Btn>
-
-                  <Muted>After placing your order, you’ll see a confirmation screen with order details.</Muted>
-                </Row>
-              </fieldset>
-            </form>
-          </>
-        )}
-      </Card>
-    </Wrap>
-  );
+  function forgetAttempt() {
+    try { sessionStorage.removeItem(`checkout-attempt:${user?.id || "guest"}`); } catch { /* Storage can be disabled. */ }
+    key.current = null;
+  }
+  function focusError(next) { document.getElementById(Object.keys(next)[0])?.focus(); }
+  async function onSubmit(event) {
+    event.preventDefault();
+    if (busy.current || !canSubmit) return;
+    const next = validateCheckout(form);
+    setErrors(next); setError("");
+    if (Object.keys(next).length) { focusError(next); return; }
+    busy.current = true; setSubmitting(true);
+    try {
+      const data = await createCheckout(checkoutPayload(form), attemptKey());
+      if (!data?.order?.id) throw new Error("The order response was incomplete. Retry this checkout attempt.");
+      forgetAttempt();
+      nav(`/order/${data.order.id}/confirmation`, { replace: true });
+      void refresh();
+    } catch (err) {
+      if (err.code === "IDEMPOTENCY_CONFLICT" && err.orderId) {
+        forgetAttempt();
+        nav(`/order/${err.orderId}/confirmation`, { replace: true });
+        void refresh();
+        return;
+      }
+      const next = localFieldErrors(err.fieldErrors);
+      setErrors(next);
+      setError(err.message === "Failed to fetch" ? "We couldn’t confirm the result. Retry to safely check the same order attempt." : err.message || "Checkout failed. Please try again.");
+      focusError(next);
+      // Validation failures occur before an order is created.
+      if (err.status === 422) forgetAttempt();
+    } finally { busy.current = false; setSubmitting(false); }
+  }
+  return <Wrap>
+    <h1>Checkout</h1><p>Portfolio demo — no payments are taken and no goods are shipped. Use test details.</p>
+    {cartStatus === "loading" && <p role="status">Loading your cart…</p>}
+    {cartError && <p role="alert">{cartError} <button onClick={refresh}>Refresh cart</button></p>}
+    {cartStatus === "done" && items.length === 0 && <p>Your cart is empty. <Link to="/products">Browse the shop</Link>.</p>}
+    {items.length > 0 && <><ul>{items.map((item) => <li key={item.cart_item_id}>{item.name} × {item.quantity} — {money(item.price_cents * item.quantity)}</li>)}</ul>
+      <p>Items: {items.reduce((sum, item) => sum + item.quantity, 0)} · Subtotal: {money(totalCents)} · Delivery: Free (demo) · <strong>Total: {money(totalCents)}</strong></p></>}
+    <form noValidate onSubmit={onSubmit}>
+      {error && <p role="alert" className="error">{error}</p>}
+      <fieldset disabled={submitting || cartStatus !== "done" || !items.length}>
+        <div className="fields">{fields.map(([name, label, type, autoComplete, maxLength]) => <label key={name} htmlFor={name}>{label}
+          <input id={name} name={name} type={type} required={name !== "address2"} autoComplete={autoComplete} maxLength={maxLength}
+            value={form[name]} onChange={(event) => setForm((previous) => ({ ...previous, [name]: event.target.value }))}
+            aria-invalid={!!errors[name]} aria-describedby={errors[name] ? `${name}-error` : undefined} />
+          {errors[name] && <span className="error" id={`${name}-error`}>{errors[name]}</span>}
+        </label>)}</div>
+        <p>Country: United Kingdom</p>
+        {errors.country && <p className="error">{errors.country}</p>}
+        <button type="submit" disabled={!canSubmit}>{submitting ? "Placing order…" : "Place demo order"}</button>
+      </fieldset>
+    </form>
+  </Wrap>;
 }

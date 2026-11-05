@@ -6,16 +6,13 @@ export function getOrders() {
 }
 
 // GET /orders/:id
-export function getOrderById(orderId) {
-  return apiRequest(`/orders/${orderId}`, { method: "GET" });
+export function getOrderById(orderId, options = {}) {
+  return apiRequest(`/orders/${orderId}`, { ...options, method: "GET" });
 }
 
-// POST /orders/claim  { guestToken }
-export function claimOrder(guestToken) {
-  return apiRequest("/orders/claim", {
-    method: "POST",
-    body: JSON.stringify({ guestToken }),
-  });
+// Save an order authorized by this browser session to the signed-in account.
+export function claimOrder(orderId) {
+  return apiRequest(`/orders/${orderId}/claim`, { method: "POST" });
 }
 
 // PATCH /orders/:id/status  { status }
