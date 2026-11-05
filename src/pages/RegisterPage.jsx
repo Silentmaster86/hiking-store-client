@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
+import { validateRegistration } from "../validation/auth";
 import { useAuth } from "../context/auth-context";
 
 const Wrap = styled.div`
@@ -108,6 +109,7 @@ const ErrorBox = styled.div`
 export default function RegisterPage() {
   const { register } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
 
   const [form, setForm] = useState({
     email: "",
@@ -118,6 +120,7 @@ export default function RegisterPage() {
 
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   function onChange(e) {
     const { name, value } = e.target;
@@ -127,6 +130,9 @@ export default function RegisterPage() {
   async function onSubmit(e) {
     e.preventDefault();
     setError("");
+    const errors = validateRegistration(form);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) { document.getElementById(Object.keys(errors)[0])?.focus(); return; }
     setStatus("submitting");
 
     try {
@@ -136,9 +142,12 @@ export default function RegisterPage() {
         firstName: form.firstName.trim() || null,
         lastName: form.lastName.trim() || null,
       });
-      nav("/", { replace: true });
+      const previous = location.state?.from;
+      nav(previous?.pathname ? `${previous.pathname}${previous.search || ""}${previous.hash || ""}` : "/", { replace: true });
     } catch (err) {
       setError(err?.message || "Registration failed.");
+      setFieldErrors(err.fieldErrors || {});
+      document.getElementById(Object.keys(err.fieldErrors || {})[0])?.focus();
       setStatus("idle");
     }
   }
@@ -147,32 +156,36 @@ export default function RegisterPage() {
     <Wrap>
       <H1>Create account</H1>
       <Muted>
-        Already have an account? <Link to="/login">Sign in</Link>
+        Already have an account? <Link to="/login" state={location.state}>Sign in</Link>
       </Muted>
 
       <Card>
-        <form onSubmit={onSubmit}>
+        <form noValidate onSubmit={onSubmit}>
           {error && <ErrorBox>{error}</ErrorBox>}
 
           <Field>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" inputMode="email" autoComplete="email" value={form.email} onChange={onChange} />
+            <Input aria-invalid={!!fieldErrors.email} aria-describedby={fieldErrors.email ? "email-error" : undefined} id="email" name="email" type="email" inputMode="email" autoComplete="email" value={form.email} onChange={onChange} />
+            {fieldErrors.email && <div id="email-error" role="alert">{fieldErrors.email}</div>}
 
           </Field>
 
           <Field>
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" autoComplete="new-password" value={form.password} onChange={onChange} />
+            <Label htmlFor="password">Password (at least 12 characters)</Label>
+            <Input aria-invalid={!!fieldErrors.password} aria-describedby={fieldErrors.password ? "password-error" : undefined} id="password" name="password" type="password" minLength={12} required autoComplete="new-password" value={form.password} onChange={onChange} />
+            {fieldErrors.password && <div id="password-error" role="alert">{fieldErrors.password}</div>}
           </Field>
 
           <Field>
             <Label htmlFor="firstName">First name</Label>
-            <Input id="firstName" name="firstName" value={form.firstName} onChange={onChange} />
+            <Input aria-invalid={!!fieldErrors.firstName} aria-describedby={fieldErrors.firstName ? "firstName-error" : undefined} id="firstName" name="firstName" value={form.firstName} onChange={onChange} />
+            {fieldErrors.firstName && <div id="firstName-error" role="alert">{fieldErrors.firstName}</div>}
           </Field>
 
           <Field>
             <Label htmlFor="lastName">Last name</Label>
-            <Input id="lastName" name="lastName" value={form.lastName} onChange={onChange} />
+            <Input aria-invalid={!!fieldErrors.lastName} aria-describedby={fieldErrors.lastName ? "lastName-error" : undefined} id="lastName" name="lastName" value={form.lastName} onChange={onChange} />
+            {fieldErrors.lastName && <div id="lastName-error" role="alert">{fieldErrors.lastName}</div>}
           </Field>
 
           <Btn

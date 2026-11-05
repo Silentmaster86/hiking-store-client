@@ -149,14 +149,15 @@ padding: 12px 0;
             
 export default function LoginPage() {
     
-  const API = import.meta.env.VITE_API_URL;
+  const API = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
   
   
   const { login } = useAuth();
   const nav = useNavigate();
   const location = useLocation();
   
-  const from = location.state?.from?.pathname || "/";
+  const previous = location.state?.from;
+  const from = previous?.pathname ? `${previous.pathname}${previous.search || ""}${previous.hash || ""}` : "/";
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -188,7 +189,7 @@ export default function LoginPage() {
     <Wrap>
       <H1>Sign in</H1>
       <Muted>
-        Don't have an account? <Link to="/register">Create one</Link>
+        Don't have an account? <Link to="/register" state={location.state}>Create one</Link>
       </Muted>
 
       <Card>
@@ -212,12 +213,12 @@ export default function LoginPage() {
         </form>
         <Divider>or</Divider>
 
-        <OAuthBtn href={`${API}/auth/google`}>
+        <OAuthBtn href={`${API}/auth/google?returnTo=${encodeURIComponent(from)}`}>
           <OAuthIcon>🌐</OAuthIcon>
           Continue with Google
         </OAuthBtn>
 
-        <OAuthBtn href={`${API}/auth/facebook`}>
+        <OAuthBtn href={`${API}/auth/facebook?returnTo=${encodeURIComponent(from)}`}>
           <OAuthIcon>📘</OAuthIcon>
           Continue with Facebook
         </OAuthBtn>
