@@ -1,3 +1,6 @@
+> Historical notes for the first stabilization stage. Guest order flows and browser
+> checks have since been added; see ORDER-FLOWS.md and README.md for current behaviour.
+
 # Store stabilization
 
 This branch fixes the production build, resets cart state when authentication

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { statusLabels } from "../../utils/orderFormatting";
 
 const Wrap = styled.div`
   margin-top: 14px;
@@ -46,10 +47,10 @@ const Sub = styled.div`
 `;
 
 const STEPS = [
-  { key: "pending", label: "Pending", sub: "Order created" },
-  { key: "paid", label: "Paid", sub: "Payment confirmed" },
-  { key: "shipped", label: "Shipped", sub: "Packed & handed to courier" },
-  { key: "delivered", label: "Delivered", sub: "Arrived to customer" },
+  { key: "pending", sub: "Demo order recorded" },
+  { key: "paid", sub: "Simulated payment step" },
+  { key: "shipped", sub: "Simulated shipment step" },
+  { key: "delivered", sub: "Simulated delivery step" },
 ];
 
 function normalizeStatus(status) {
@@ -65,7 +66,7 @@ export default function OrderStatusTimeline({ status }) {
     return (
       <Wrap>
         <Title>Order status</Title>
-        <Sub style={{ color: "rgba(220,38,38,0.95)", fontWeight: 900 }}>
+        <Sub style={{ color: "#fca5a5", fontWeight: 900 }}>
           Cancelled
         </Sub>
       </Wrap>
@@ -89,7 +90,7 @@ export default function OrderStatusTimeline({ status }) {
             <div key={s.key} style={{ display: "contents" }}>
               <Dot $state={state} />
               <Step>
-                <Label>{s.label}</Label>
+                <Label>{statusLabels[s.key]}</Label>
                 <Sub>{s.sub}</Sub>
               </Step>
             </div>
