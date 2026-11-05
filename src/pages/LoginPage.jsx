@@ -70,7 +70,7 @@ padding: 12px 0;
       /* Better mobile typing */
       @media (max-width: 520px) {
         padding: 10px 12px;
-        font-size: 14px; /* prevents iOS zoom */
+        font-size: 16px; /* avoids automatic input zoom on iOS */
         }
         `;
         
@@ -99,7 +99,7 @@ padding: 12px 0;
           margin-top: 10px;
           border: 1px solid rgba(220, 38, 38, 0.4);
           background: rgba(220, 38, 38, 0.08);
-          color: rgba(220, 38, 38, 0.95);
+          color: ${({ theme }) => theme.colors.danger};
           border-radius: 14px;
           padding: 10px 12px;
           font-weight: 800;

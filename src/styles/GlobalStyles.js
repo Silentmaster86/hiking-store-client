@@ -5,11 +5,19 @@ const GlobalStyles = createGlobalStyle`
     color-scheme: dark;
 
     /* The app background is controlled via CSS variable (set from Layout). */
-    --app-bg: none;
+    --app-bg: url("/img/products/accessories-06-landscape.jpg");
   }
 
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html, body { min-height: 100%; }
+  html { scrollbar-gutter: stable; }
+  body:has(dialog[open]) { overflow: hidden; }
+  :focus-visible { outline: 3px solid #ff9900; outline-offset: 4px; }
+  button { font: inherit; }
+  button:disabled { cursor: not-allowed; }
+  @media(prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
 
   body {
     margin: 0;

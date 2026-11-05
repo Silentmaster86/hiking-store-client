@@ -1,265 +1,32 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-
+import { categories } from "../../constants/categories";
+import { site } from "../../config/site";
+import { useAuth } from "../../context/auth-context";
 const Wrap = styled.footer`
-  margin-top: 28px;
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255, 255, 255, 0.02);
+  margin-top: 30px; border-top: 1px solid ${({ theme }) => theme.colors.border}; background: ${({ theme }) => theme.colors.surface};
+  .inner { max-width: ${({ theme }) => theme.container.max}; margin: 0 auto; padding: 28px ${({ theme }) => theme.container.pad}; }
+  .columns { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1.2fr; gap: 24px; }
+  nav, .about { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  h2 { font-size: 15px; margin: 0 0 4px; }
+  p { margin: 0 0 16px; line-height: 1.6; font-size: 14px; color: ${({ theme }) => theme.colors.muted}; }
+  a { color: ${({ theme }) => theme.colors.text}; text-decoration: none; font-size: 14px; overflow-wrap: anywhere; }
+  a:hover { text-decoration: underline; }
+  .brand { font-size: 18px; font-weight: 800; display: inline-block; margin-bottom: 12px; }
+  .socials, .legal { display: flex; flex-wrap: wrap; gap: 14px; }
+  .bottom { border-top: 1px solid ${({ theme }) => theme.colors.border}; margin-top: 24px; padding-top: 18px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  small { color: ${({ theme }) => theme.colors.muted}; }
+  @media(max-width: 980px) { .columns { grid-template-columns: 1fr 1fr; } }
+  @media(max-width: 560px) { .columns { grid-template-columns: 1fr; } }
 `;
-
-const Inner = styled.div`
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 22px 0;
-`;
-
-const Top = styled.div`
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
-
-  @media (max-width: 980px) {
-    grid-template-columns: 1fr 1fr;
-  }
-  @media (max-width: 560px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Brand = styled.div`
-  display: grid;
-  gap: 10px;
-`;
-
-const Logo = styled.div`
-  font-weight: 1000;
-  letter-spacing: -0.4px;
-  font-size: 16px;
-`;
-
-const Muted = styled.p`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.muted};
-  line-height: 1.5;
-  font-size: 13px;
-  max-width: 52ch;
-`;
-
-const Col = styled.div`
-  display: grid;
-  gap: 8px;
-  align-content: start;
-`;
-
-const H = styled.div`
-  font-weight: 1000;
-  font-size: 13px;
-  letter-spacing: -0.2px;
-`;
-
-const A = styled(Link)`
-  text-decoration: none;
-  color: ${({ theme }) => theme.colors.text};
-  opacity: 0.9;
-  font-weight: 800;
-  font-size: 13px;
-
-  &:hover {
-    opacity: 1;
-    text-decoration: underline;
-  }
-`;
-
-const Ext = styled.a`
-  text-decoration: none;
-  color: ${({ theme }) => theme.colors.text};
-  opacity: 0.9;
-  font-weight: 800;
-  font-size: 13px;
-
-  &:hover {
-    opacity: 1;
-    text-decoration: underline;
-  }
-`;
-
-const Newsletter = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 16px;
-  padding: 14px;
-  display: grid;
-  gap: 10px;
-`;
-
-const Form = styled.form`
-  display: flex;
-  gap: 10px;
-
-  @media (max-width: 560px) {
-    flex-direction: column;
-  }
-`;
-
-const Input = styled.input`
-  flex: 1;
-  border-radius: 12px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(0, 0, 0, 0.18);
-  color: ${({ theme }) => theme.colors.text};
-  padding: 10px 12px;
-  outline: none;
-`;
-
-const Btn = styled.button`
-  border: 0;
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-weight: 1000;
-  cursor: pointer;
-  background: ${({ theme }) => theme.colors.accent};
-  color: white;
-
-  &:hover {
-    opacity: 0.92;
-  }
-`;
-
-const Social = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-`;
-
-const Pill = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: rgba(255, 255, 255, 0.03);
-  color: ${({ theme }) => theme.colors.text};
-  text-decoration: none;
-  font-weight: 900;
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 999px;
-
-  &:hover {
-    opacity: 0.92;
-  }
-`;
-
-const Bottom = styled.div`
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-`;
-
-const Tiny = styled.div`
-  color: ${({ theme }) => theme.colors.muted};
-  font-size: 12px;
-`;
-
-const MiniLinks = styled.div`
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-`;
-
-const Mini = styled(Link)`
-  text-decoration: none;
-  color: ${({ theme }) => theme.colors.muted};
-  font-weight: 900;
-  font-size: 12px;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.text};
-    text-decoration: underline;
-  }
-`;
-
 export default function Footer() {
-  const year = new Date().getFullYear();
-
-  function handleNewsletterSubmit(e) {
-    e.preventDefault();
-    // MVP: tylko UX. Możemy później podpiąć backend / Mailchimp.
-    alert("Thanks! Newsletter coming soon 🙂");
-  }
-
-  return (
-    <Wrap>
-      <Inner>
-        <Top>
-          <Brand>
-            <Logo>Hiking Store</Logo>
-            <Muted>
-              Outdoor essentials for UK weekends — clean UI, real API + sessions.
-              Built as a portfolio e-commerce project.
-            </Muted>
-
-            <Social>
-              <Pill href="https://github.com/Silentmaster86" target="_blank" rel="noreferrer">
-                🐙 GitHub
-              </Pill>
-              <Pill href="https://www.linkedin.com/in/przemyslaw-pietkun-front-end-dev" target="_blank" rel="noreferrer">
-                💼 LinkedIn
-              </Pill>
-              <Pill href="mailto:hello@hiking-store.local">
-                ✉️ Email
-              </Pill>
-            </Social>
-          </Brand>
-
-          <Col>
-            <H>Shop</H>
-            <A to="/products">All products</A>
-            <A to="/products?category=boots">Boots</A>
-            <A to="/products?category=jackets">Jackets</A>
-            <A to="/products?category=backpacks">Backpacks</A>
-            <A to="/products?category=accessories">Accessories</A>
-          </Col>
-
-          <Col>
-            <H>Help</H>
-            <A to="/cart">Cart</A>
-            <A to="/orders">Orders</A>
-            <A to="/login">Sign in</A>
-            <A to="/register">Create account</A>
-          </Col>
-
-          <Newsletter>
-            <H>Get trail deals (demo)</H>
-            <Muted style={{ margin: 0 }}>
-              Newsletter is UI-only for now. We can wire it to an API later.
-            </Muted>
-            <Form onSubmit={handleNewsletterSubmit}>
-              <Input
-                type="email"
-                placeholder="Email address"
-                required
-                aria-label="Email address"
-              />
-              <Btn type="submit">Subscribe</Btn>
-            </Form>
-          </Newsletter>
-        </Top>
-
-        <Bottom>
-          <Tiny>© {year} Hiking Store. All rights reserved.</Tiny>
-
-          <MiniLinks>
-            <Mini to="/products">Products</Mini>
-            <Mini to="/privacy">Privacy</Mini>
-            <Mini to="/terms">Terms</Mini>
-          </MiniLinks>
-        </Bottom>
-      </Inner>
-    </Wrap>
-  );
+  const { user } = useAuth();
+  return <Wrap><div className="inner"><div className="columns">
+    <div><Link className="brand" to="/">{site.name}</Link><p>Outdoor essentials for UK adventures. A portfolio store with demo orders and no real payments or deliveries.</p>
+      <div className="socials"><a href={site.github} target="_blank" rel="noreferrer">GitHub</a><a href={site.linkedin} target="_blank" rel="noreferrer">LinkedIn</a></div>
+    </div>
+    <nav aria-label="Shop links"><h2>Shop</h2><Link to="/products">All products</Link>{categories.map((item) => <Link key={item.slug} to={`/products?category=${item.slug}`}>{item.label}</Link>)}</nav>
+    <nav aria-label="Account links"><h2>Your account</h2><Link to="/cart">Cart</Link><Link to="/orders">Your orders</Link>{!user && <><Link to="/login">Sign in</Link><Link to="/register">Create account</Link></>}</nav>
+    <div className="about"><h2>About this project</h2><p>Try the shopping flow with test details. Products and images are illustrative.</p><Link to="/about">About this demo</Link><a href={`mailto:${site.contactEmail}`}>Contact the project owner</a></div>
+  </div><div className="bottom"><small>© {new Date().getFullYear()} {site.name} · Portfolio demo</small><nav className="legal" aria-label="Legal links"><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link><Link to="/data-deletion">Delete my data</Link></nav></div></div></Wrap>;
 }

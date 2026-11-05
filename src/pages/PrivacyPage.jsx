@@ -1,58 +1,14 @@
-import styled from "styled-components";
-
-const Wrap = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 18px 0;
-`;
-
-const H1 = styled.h1`
-  margin-bottom: 12px;
-`;
-
-const P = styled.p`
-  line-height: 1.6;
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
-const H2 = styled.h2`
-  margin-top: 22px;
-`;
-
+import { Link } from "react-router-dom";
+import InfoPage from "../components/layout/InfoPage";
+import { site } from "../config/site";
 export default function PrivacyPage() {
-  return (
-    <Wrap>
-      <H1>Privacy Policy</H1>
-
-      <P>
-        This is a demo e-commerce project built for portfolio and educational
-        purposes. No real purchases are processed.
-      </P>
-
-      <H2>Information we collect</H2>
-      <P>
-        We may collect basic account information such as name and email address
-        when you create an account. This data is used only to demonstrate
-        authentication and order flows.
-      </P>
-
-      <H2>How we use your information</H2>
-      <P>
-        Your information is used only to operate this demo application,
-        including login, cart, and order history features.
-      </P>
-
-      <H2>Cookies & sessions</H2>
-      <P>
-        This site may use cookies or session storage to keep you logged in and
-        maintain your cart. These are used strictly for functionality.
-      </P>
-
-      <H2>Contact</H2>
-      <P>
-        If you have any questions about this privacy policy, please contact:
-        hello@hiking-store.local
-      </P>
-    </Wrap>
-  );
+  return <InfoPage title="Privacy policy">
+    <p>Last updated: 5 November 2026.</p><p>This portfolio demo is operated by Przemysław Pietkun. No real purchases, payments or deliveries are processed. Please use test details.</p>
+    <h2>Information stored</h2><p>The application stores account email addresses, names and password hashes for email accounts. External sign-in may provide a name, email address and provider account identifier. Checkout stores the supplied name, email, delivery address, country, order items and amounts.</p>
+    <h2>How the information is used</h2><p>These details support sign-in, carts, demo checkout, order access and order history. They are not used by this application to send marketing newsletters.</p>
+    <h2>Cookies and browser storage</h2><p>A session cookie connects your browser to its account, cart and guest-order access. Session cookies can last up to seven days. A temporary checkout reference is stored in sessionStorage to recover interrupted attempts; addresses and passwords are not saved there by the application. Clearing cookies removes guest access.</p>
+    <h2>Services involved</h2><p>The frontend is hosted by Netlify. The API and database use the configured hosting infrastructure, including Render. Google or Facebook processes sign-in when you choose that provider. Those services have their own privacy information.</p>
+    <h2>Retention and deletion</h2><p>Saved accounts and orders currently have no automatic deletion schedule. Guest access expires after seven days; this does not delete the saved order. You can request access, correction or deletion by contacting the project owner.</p>
+    <h2>Contact</h2><p><a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a></p><p><Link to="/data-deletion">How to request deletion of your data</Link></p>
+  </InfoPage>;
 }

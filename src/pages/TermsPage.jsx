@@ -1,57 +1,11 @@
-import styled from "styled-components";
-
-const Wrap = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 18px 0;
-`;
-
-const H1 = styled.h1`
-  margin-bottom: 12px;
-`;
-
-const P = styled.p`
-  line-height: 1.6;
-  color: ${({ theme }) => theme.colors.muted};
-`;
-
-const H2 = styled.h2`
-  margin-top: 22px;
-`;
-
+import { Link } from "react-router-dom";
+import InfoPage from "../components/layout/InfoPage";
 export default function TermsPage() {
-  return (
-    <Wrap>
-      <H1>Terms & Conditions</H1>
-
-      <P>
-        This website is a demonstration project created for portfolio and
-        educational purposes only.
-      </P>
-
-      <H2>No real purchases</H2>
-      <P>
-        Products, prices, and checkout flows are simulated. No real payments
-        are processed and no physical goods are shipped.
-      </P>
-
-      <H2>Accounts</H2>
-      <P>
-        User accounts are provided for demonstration of authentication and
-        session handling only.
-      </P>
-
-      <H2>Liability</H2>
-      <P>
-        The owner of this website is not responsible for any damages or losses
-        arising from the use of this demo application.
-      </P>
-
-      <H2>Changes</H2>
-      <P>
-        These terms may be updated at any time to reflect changes to this
-        demonstration project.
-      </P>
-    </Wrap>
-  );
+  return <InfoPage title="Terms of use">
+    <p>Last updated: 5 November 2026.</p><p>Hiking Store is a portfolio and educational demonstration.</p>
+    <h2>Demo products and orders</h2><p>Products, prices, images and descriptions are illustrative. Placing an order does not create a real purchase. No payment is taken and no goods are delivered. Demo payment and shipment statuses are simulations.</p>
+    <h2>Accounts and access</h2><p>Use test details to explore the application. Guest access is tied to the browser session and is available for up to seven days from checkout. You can save an eligible guest order to an account from its confirmation page. Access may be lost when cookies are cleared.</p>
+    <h2>Availability</h2><p>The demo may be updated, unavailable or reset during maintenance. It is not intended for placing real purchases or storing information you need to retain.</p>
+    <h2>Personal information</h2><p>Read the <Link to="/privacy">privacy policy</Link> for details about stored information and the <Link to="/data-deletion">data deletion instructions</Link> to contact the owner.</p>
+  </InfoPage>;
 }
