@@ -100,7 +100,7 @@ const ErrorBox = styled.div`
   margin-top: 10px;
   border: 1px solid rgba(220, 38, 38, 0.4);
   background: rgba(220, 38, 38, 0.08);
-  color: rgba(220, 38, 38, 0.95);
+  color: ${({ theme }) => theme.colors.danger};
   border-radius: 14px;
   padding: 10px 12px;
   font-weight: 800;

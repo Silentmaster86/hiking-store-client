@@ -12,6 +12,7 @@ const Card = styled.section`
   li { margin: 16px 0; }
   button { margin: 4px; padding: 8px 12px; cursor: pointer; }
   a { color: inherit; }
+  a.primary { display: inline-block; padding: 12px 16px; border-radius: 10px; background: ${({ theme }) => theme.colors.primary}; color: ${({ theme }) => theme.colors.primaryText}; font-weight: 800; text-decoration: none; }
 `;
 const money = (cents) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(cents / 100);
 
@@ -37,7 +38,7 @@ export default function CartPage() {
         </li>
       ))}</ul>
       <p><strong>Total: {money(totalCents)}</strong></p>
-      {items.length > 0 && !busy && !error && <Link to="/checkout">Continue to checkout</Link>}
+      {items.length > 0 && !busy && !error && <Link className="primary" to="/checkout">Continue to checkout</Link>}
     </Card>
   );
 }

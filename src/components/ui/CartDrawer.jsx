@@ -1,24 +1,22 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../../context/auth-context";
+import { useModalDialog, closeOnBackdrop } from "../../hooks/useModalDialog";
 import { useCart } from "../../context/cart-context";
 import { SkeletonLine, SkeletonBlock } from "./Skeletons";
 
-const Overlay = styled.div`
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 50;
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  pointer-events: ${({ $open }) => ($open ? "auto" : "none")};
-  transition: opacity 180ms ease;
-`;
-
-const Panel = styled.aside`
+const Panel = styled.dialog`
   position: fixed;
   top: 0;
   right: 0;
-  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  max-width: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  &::backdrop { background: rgba(0,0,0,0.65); }
 
   width: min(420px, 92vw);
 
@@ -35,7 +33,8 @@ const Panel = styled.aside`
   border-left: 1px solid ${({ theme }) => theme.colors.border};
   transform: translateX(${({ $open }) => ($open ? "0" : "100%")});
   transition: transform 220ms ease;
-  display: flex;
+  display: none;
+  &[open] { display: flex; }
   flex-direction: column;
   backdrop-filter: blur(12px);
 
@@ -111,7 +110,7 @@ const Muted = styled.div`
 const ErrorBox = styled.div`
   border: 1px solid rgba(220, 38, 38, 0.4);
   background: rgba(220, 38, 38, 0.08);
-  color: rgba(220, 38, 38, 0.95);
+  color: ${({ theme }) => theme.colors.danger};
   border-radius: 14px;
   padding: 10px 12px;
   font-weight: 800;
@@ -120,6 +119,7 @@ const ErrorBox = styled.div`
 
 const Controls = styled.div`
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -280,37 +280,32 @@ export default function CartDrawer() {
 
   const nav = useNavigate();
 
-  useEffect(() => {
-    if (!open) return;
-    const handleKey = (event) => { if (event.key === "Escape") closeCart(); };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [open, closeCart]);
+  const dialog = useModalDialog(open);
+  const { user } = useAuth();
 
   const busy = status === "loading" || status === "saving";
 
   return (
     <>
-      <Overlay $open={open} onClick={closeCart} />
-      <Panel $open={open} aria-hidden={!open} inert={!open}>
+      <Panel ref={dialog} $open={open} aria-label="Shopping cart" aria-hidden={!open} inert={!open} onCancel={(event) => { event.preventDefault(); closeCart(); }} onClose={closeCart} onClick={(event) => closeOnBackdrop(event, closeCart)}>
         <Head>
           <Title>
             Cart {busy && <Tag>Syncing…</Tag>}
           </Title>
-          <CloseBtn type="button" onClick={closeCart}>
+          <CloseBtn autoFocus type="button" onClick={closeCart}>
             Close
           </CloseBtn>
         </Head>
 
         <List>
-          {status === "error" && <ErrorBox>{error || "Cart error"}<button type="button" onClick={refresh}>Refresh cart</button></ErrorBox>}
+          {status === "error" && <ErrorBox role="alert">{error || "Could not load your cart."}<CloseBtn type="button" onClick={refresh}>Refresh cart</CloseBtn></ErrorBox>}
 
           {/* ✅ Skeleton gdy jeszcze nie mamy items */}
           {busy && items.length === 0 && <CartSkeleton />}
 
           {/* Empty state dopiero gdy NIE loading */}
-          {!busy && items.length === 0 && (
-            <Muted>Your cart is empty. Add something from Products.</Muted>
+          {!busy && status !== "error" && items.length === 0 && (
+            <Muted>Your cart is empty. Browse the shop to get started.</Muted>
           )}
 
           {/* Items */}
@@ -326,11 +321,11 @@ export default function CartDrawer() {
 
                   <Controls>
                     <Qty>
-                      <QtyBtn type="button" disabled={busy} onClick={() => setQty(id, it.quantity - 1)}>
+                      <QtyBtn type="button" disabled={busy} aria-label={`Decrease quantity of ${it.name}`} onClick={() => setQty(id, it.quantity - 1)}>
                         −
                       </QtyBtn>
                       <QtyVal>{it.quantity}</QtyVal>
-                      <QtyBtn type="button" disabled={busy} onClick={() => setQty(id, it.quantity + 1)}>
+                      <QtyBtn type="button" disabled={busy} aria-label={`Increase quantity of ${it.name}`} onClick={() => setQty(id, it.quantity + 1)}>
                         +
                       </QtyBtn>
                     </Qty>
@@ -366,7 +361,7 @@ export default function CartDrawer() {
             Checkout
           </CTA>
 
-          <Small>This cart is stored in a server session (guest cart).</Small>
+          <Small>{user ? "Your cart is saved to your account." : "Your cart is saved in this browser session."}</Small>
         </Foot>
       </Panel>
     </>

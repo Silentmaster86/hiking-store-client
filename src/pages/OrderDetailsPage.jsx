@@ -8,7 +8,10 @@ import OrderStatusTimeline from "../components/orders/OrderStatusTimeline";
 const Wrap = styled.section`
   max-width: 900px; margin: 0 auto; padding: 18px;
   border: 1px solid ${({ theme }) => theme.colors.border}; background: ${({ theme }) => theme.colors.surface}; border-radius: 18px;
-  button, a { display: inline-block; padding: 10px; margin: 8px; color: inherit; }
+  a { color: ${({ theme }) => theme.colors.text}; text-underline-offset: 3px; }
+  button { border: 0; border-radius: 10px; font: inherit; font-weight: 800; background: ${({ theme }) => theme.colors.primary}; color: ${({ theme }) => theme.colors.primaryText}; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: not-allowed; }
+  button, a { display: inline-block; padding: 10px; margin: 8px; }
 `;
 const next = { pending: "paid", paid: "shipped", shipped: "delivered" };
 export default function OrderDetailsPage() {

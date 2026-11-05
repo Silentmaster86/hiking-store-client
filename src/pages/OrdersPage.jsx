@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { statusLabels } from "../utils/orderFormatting";
 import { getOrders } from "../api/orders";
 import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
 
@@ -116,13 +117,9 @@ function formatDate(iso) {
 }
 
 function statusMeta(status) {
-  const s = String(status || "pending").toLowerCase();
-  if (s === "delivered") return { label: "Delivered", tone: "success" };
-  if (s === "shipped") return { label: "Shipped", tone: "purple" };
-  if (s === "paid") return { label: "Paid", tone: "info" };
-  if (s === "pending") return { label: "Pending", tone: "warn" };
-  if (s === "cancelled") return { label: "Cancelled", tone: "danger" };
-  return { label: s || "-", tone: "neutral" };
+  const value = String(status || "pending").toLowerCase();
+  const tones = { delivered: "success", shipped: "purple", paid: "info", pending: "warn", created: "warn", cancelled: "danger" };
+  return { label: statusLabels[value] || value, tone: tones[value] || "neutral" };
 }
 
 function StatusBadge({ status }) {
@@ -167,10 +164,6 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [status, setStatus] = useState("idle"); // loading | error | done
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    document.title = "Orders — Hiking Store";
-  }, []);
 
   useEffect(() => {
     let active = true;

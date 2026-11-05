@@ -11,6 +11,8 @@ import RegisterPage from "../pages/RegisterPage";
 import RequireAuth from "../components/auth/RequireAuth";
 import PrivacyPage from "../pages/PrivacyPage";
 import TermsPage from "../pages/TermsPage";
+import AboutPage from "../pages/AboutPage";
+import DataDeletionPage from "../pages/DataDeletionPage";
 
 import CartPage from "../pages/CartPage";
 import NotFoundPage from "../pages/NotFoundPage";
@@ -26,6 +28,8 @@ export default function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id/confirmation" element={<OrderConfirmationPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/data-deletion" element={<DataDeletionPage />} />
         <Route path="/terms" element={<TermsPage />} />
 
         {/* Auth routes */}
