@@ -15,7 +15,7 @@ async function scenario(browser, run) {
     const request = route.request(), url = new URL(request.url()), p = url.pathname;
     let data, status = 200;
     if (p.startsWith("/api/")) {
-      if (p === "/api/auth/me") data = { user: fixture.user };
+      if (p === "/api/auth/me") { if (fixture.authGate) await fixture.authGate; data = { user: fixture.user }; }
       else if (p === "/api/auth/login") { fixture.user = { id: 7, email: "buyer@example.com" }; data = { user: fixture.user }; }
       else if (p === "/api/auth/logout") { fixture.user = null; data = { ok: true }; }
       else if (p === "/api/cart") data = { cartId: 1, items: fixture.items };
@@ -138,14 +138,18 @@ async function fillCheckout(page) {
       await page.getByRole("heading", { name: "Test Backpack", exact: true }).waitFor();
     });
     console.log("PASS: category labels, metadata, contact links, opaque cards, modal focus and catalogue retry");
-    await scenario(browser, async (page) => {
+    await scenario(browser, async (page, fixture) => {
       await page.setViewportSize({ width: 390, height: 844 });
+      let releaseAuth;
+      fixture.authGate = new Promise((resolve) => { releaseAuth = resolve; });
       await page.goto("https://hiking.test/");
-      await page.locator("#mobile-navigation a[href='/login']").waitFor({ state: "attached" });
       const trigger = page.getByRole("button", { name: "Open menu", exact: true });
       await trigger.click();
       const menu = page.getByRole("dialog", { name: "Mobile navigation" });
       await menu.waitFor();
+      releaseAuth();
+      await menu.getByRole("link", { name: "Sign in", exact: true }).waitFor();
+      assert.equal(await menu.evaluate((element) => element.open), true, "Finishing the auth lookup must not dismiss the menu");
       for (let index = 0; index < 8; index++) {
         await page.keyboard.press("Tab");
         assert.equal(await page.evaluate(() => document.activeElement.closest("dialog")?.getAttribute("aria-label")), "Mobile navigation");
@@ -162,6 +166,6 @@ async function fillCheckout(page) {
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `No page overflow at ${width}px`);
       }
     });
-    console.log("PASS: mobile menu focus, Escape, navigation and narrow viewports");
+    console.log("PASS: mobile menu survives auth lookup, traps focus, handles Escape and narrow viewports");
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });

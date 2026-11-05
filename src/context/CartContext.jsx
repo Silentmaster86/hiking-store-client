@@ -5,7 +5,7 @@ import { useAuth } from "./auth-context";
 
 export function CartProvider({ children }) {
   const { user, status } = useAuth();
-  return <SessionCart key={`${status}:${user?.id ?? "guest"}`} ready={status === "ready"}>{children}</SessionCart>;
+  return <SessionCart key={user?.id ?? "guest"} ready={status === "ready"}>{children}</SessionCart>;
 }
 
 function SessionCart({ ready, children }) {
