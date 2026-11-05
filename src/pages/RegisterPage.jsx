@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/auth-context";
 
 const Wrap = styled.div`
   max-width: 520px;

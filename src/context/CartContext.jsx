@@ -1,104 +1,109 @@
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCart, addCartItem, updateCartItem, removeCartItem } from "../api/cart";
-
-const CartContext = createContext(null);
+import { CartContext } from "./cart-context";
+import { useAuth } from "./auth-context";
 
 export function CartProvider({ children }) {
-  const [open, setOpen] = useState(false);
-  const [cartId, setCartId] = useState(null);
-  const [items, setItems] = useState([]);
-  const [status, setStatus] = useState("idle"); // idle | loading | error | done
-  const [error, setError] = useState("");
+  const { user, status } = useAuth();
+  return <SessionCart key={`${status}:${user?.id ?? "guest"}`} ready={status === "ready"}>{children}</SessionCart>;
+}
 
-  // ✅ stable function => no infinite refresh loop
+function SessionCart({ ready, children }) {
+  const [open, setOpen] = useState(false);
+  const [cart, setCart] = useState({ cartId: null, items: [] });
+  const [status, setStatus] = useState("loading");
+  const [error, setError] = useState("");
+  const writing = useRef(false);
+  const alive = useRef(true);
+  const revision = useRef(0);
+  const initialRead = useRef(null);
+  const needsRefresh = useRef(false);
+
+  const applyCart = useCallback((data) => {
+    setCart({ cartId: data?.cartId ?? null, items: Array.isArray(data?.items) ? data.items : [] });
+    setStatus("done");
+    setError("");
+    needsRefresh.current = false;
+  }, []);
+
+  useEffect(() => {
+    alive.current = true;
+    if (ready) {
+      const version = ++revision.current;
+      initialRead.current ??= getCart();
+      initialRead.current.then((data) => {
+        if (alive.current && version === revision.current) applyCart(data);
+      }).catch(() => {
+        if (!alive.current || version !== revision.current) return;
+        setStatus("error");
+        setError("Could not load your cart. Please try again.");
+      });
+    }
+    return () => { alive.current = false; };
+  }, [ready, applyCart]);
+
   const refresh = useCallback(async () => {
+    if (!ready || writing.current) return false;
+    const version = ++revision.current;
     setStatus("loading");
     setError("");
     try {
       const data = await getCart();
-      setCartId(data?.cartId ?? null);
-      setItems(Array.isArray(data?.items) ? data.items : []);
-      setStatus("done");
-    } catch (e) {
-      console.error("Cart error:", e);
-
-        let message = "Could not load your cart. Please try again.";
-
-        if (e.message === "Failed to fetch") {
-          message = "Cannot connect to the server. Please try again in a moment.";
-        }
-      
+      if (alive.current && version === revision.current) applyCart(data);
+      return true;
+    } catch {
+      if (alive.current && version === revision.current) {
         setStatus("error");
-        setError(message);
+        setError("Could not load your cart. Please try again.");
       }
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  const value = useMemo(() => {
-    function openCart() {
-      setOpen(true);
+      return false;
     }
-    function closeCart() {
-      setOpen(false);
-    }
-    function toggleCart() {
-      setOpen((v) => !v);
-    }
+  }, [ready, applyCart]);
 
-    async function addItem(product, quantity = 1) {
-      await addCartItem(product.id, quantity);
-      await refresh();
-      setOpen(true);
-    }
-
-    // id = cart_item_id
-    async function setQty(cartItemId, quantity) {
-      const q = Number(quantity);
-      if (!Number.isFinite(q)) return;
-
-      if (q <= 0) {
-        await removeCartItem(cartItemId);
-      } else {
-        await updateCartItem(cartItemId, q);
+  const mutate = useCallback(async (operation) => {
+    if (!ready || writing.current || needsRefresh.current) return false;
+    writing.current = true;
+    ++revision.current;
+    setStatus("saving");
+    setError("");
+    let saved = false;
+    try {
+      await operation();
+      saved = true;
+      const data = await getCart();
+      if (alive.current) applyCart(data);
+      return true;
+    } catch {
+      if (alive.current) {
+        needsRefresh.current = true;
+        setStatus("error");
+        setError(saved
+          ? "Your change was saved, but the cart could not be refreshed. Refresh the cart before trying again."
+          : "We couldn’t update your cart. Refresh your cart and try again.");
       }
-      await refresh();
+      return false;
+    } finally {
+      writing.current = false;
     }
+  }, [ready, applyCart]);
 
-    async function removeItem(cartItemId) {
-      await removeCartItem(cartItemId);
-      await refresh();
-    }
-
-    const totalCents = items.reduce(
-      (sum, it) => sum + Number(it.price_cents || 0) * Number(it.quantity || 0),
-      0
-    );
-
-    return {
-      open,
-      cartId,
-      items,
-      status,
-      error,
-      totalCents,
-      openCart,
-      closeCart,
-      toggleCart,
-      refresh,
-      addItem,
-      setQty,
-      removeItem,
-    };
-  }, [open, cartId, items, status, error, refresh]);
-
+  const addItem = useCallback(async (product, quantity = 1) => {
+    const success = await mutate(() => addCartItem(product.id, quantity));
+    if (alive.current) setOpen(true);
+    return success;
+  }, [mutate]);
+  const setQty = useCallback((id, quantity) => {
+    const value = Number(quantity);
+    if (!Number.isInteger(value) || value < 0) return Promise.resolve(false);
+    return mutate(() => value === 0 ? removeCartItem(id) : updateCartItem(id, value));
+  }, [mutate]);
+  const removeItem = useCallback((id) => mutate(() => removeCartItem(id)), [mutate]);
+  const value = useMemo(() => ({
+    ...cart, open, status, error, refresh, addItem, setQty, removeItem,
+    totalCents: cart.items.reduce((sum, item) => sum + Number(item.price_cents) * Number(item.quantity), 0),
+    openCart: () => setOpen(true),
+    closeCart: () => setOpen(false),
+    toggleCart: () => setOpen((previous) => !previous),
+  }), [cart, open, status, error, refresh, addItem, setQty, removeItem]);
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-}
-
-export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside CartProvider");
-  return ctx;
 }

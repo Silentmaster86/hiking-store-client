@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/auth-context";
 
 
 const Wrap = styled.div`
@@ -166,11 +166,9 @@ export default function LoginPage() {
   
   const [params] = useSearchParams();
   
-  useEffect(() => {
-    const err = params.get("error");
-    if (err === "google") setError("Google login failed.");
-    if (err === "facebook") setError("Facebook login failed.");
-  }, []);
+  const providerError = params.get("error");
+  const visibleError = error || (providerError === "google" ? "Google sign-in failed. Please try again."
+    : providerError === "facebook" ? "Facebook sign-in failed. Please try again." : "");
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -195,7 +193,7 @@ export default function LoginPage() {
 
       <Card>
         <form onSubmit={onSubmit}>
-          {error && <ErrorBox>{error}</ErrorBox>}
+          {visibleError && <ErrorBox>{visibleError}</ErrorBox>}
 
           <Field>
             <Label htmlFor="email">Email</Label>

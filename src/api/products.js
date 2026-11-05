@@ -1,2 +1,2 @@
-import { request } from "./client";
-export const fetchProducts = () => request("/products");
+import { apiGet } from "./http";
+export const fetchProducts = () => apiGet("/products");

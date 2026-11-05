@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
 import styled from "styled-components";
 import { getOrderById } from "../api/orders";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/auth-context";
 
 const Wrap = styled.div`
   max-width: 760px;

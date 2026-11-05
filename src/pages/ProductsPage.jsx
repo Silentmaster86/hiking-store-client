@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchProducts } from "../api/products";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/cart-context";
 import { ProductCardSkeletonContent } from "../components/ui/Skeletons";
 
 const Wrap = styled.div`
@@ -168,7 +168,7 @@ function getCategoryMeta(category) {
 }
 
 export default function ProductsPage() {
-  const { addItem } = useCart();
+  const { addItem, status: cartStatus } = useCart();
 
   const [items, setItems] = useState(null); // null = loading
   const [error, setError] = useState(null);
@@ -245,7 +245,7 @@ export default function ProductsPage() {
         <div style={{ color: "crimson" }}>
           {error}
           <div style={{ marginTop: 8, color: "#666" }}>
-            Check web address in Render.
+            Please refresh the page and try again.
           </div>
         </div>
       )}
@@ -270,7 +270,7 @@ export default function ProductsPage() {
                   <Desc>{p.description}</Desc>
                   <Bar>
                     <Price>{formatPrice(p.price_cents)}</Price>
-                    <Btn onClick={() => addItem(p, 1)}>Add to cart</Btn>
+                    <Btn disabled={cartStatus === "loading" || cartStatus === "saving"} onClick={() => addItem(p, 1)}>Add to cart</Btn>
                   </Bar>
                 </Body>
               </Card>

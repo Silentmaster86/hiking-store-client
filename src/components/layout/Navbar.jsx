@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useCart } from "../../context/CartContext.jsx";
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useCart } from "../../context/cart-context";
+import { useAuth } from "../../context/auth-context";
 
 /* =========================
    Layout wrappers

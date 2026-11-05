@@ -12,13 +12,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <AuthProvider>
-        <CartProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-        </CartProvider>
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </ThemeProvider>
   </React.StrictMode>
 );

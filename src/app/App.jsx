@@ -12,12 +12,17 @@ import RequireAuth from "../components/auth/RequireAuth";
 import PrivacyPage from "../pages/PrivacyPage";
 import TermsPage from "../pages/TermsPage";
 
+import CartPage from "../pages/CartPage";
+import NotFoundPage from "../pages/NotFoundPage";
+
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="*" element={<NotFoundPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:id/confirmation" element={<OrderConfirmationPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
