@@ -25,6 +25,7 @@ original project. No secrets belong in VITE variables: they are part of the buil
 
 ## Features
 
+- Product detail pages, name search, price/name sorting and URL-preserved filters.
 - Four category links with stable slugs and one shared label definition.
 - Cart page and modal drawer, quantity changes, recovery from failed writes.
 - Account cart persistence and one-time merging of actual guest additions.
@@ -37,15 +38,13 @@ original project. No secrets belong in VITE variables: they are part of the buil
 ## Checks
 
 ```sh
-npm test
-npm run lint
-npm run build
+npm run verify
 ```
 
 Optional browser checks use the pinned tool configured in CI:
 
 ```sh
-npm install --no-save --package-lock=false playwright@1.56.1
+npm install --no-save --package-lock=false playwright@1.65.0
 npx playwright install --with-deps chromium
 npm run test:browser
 ```
@@ -57,6 +56,8 @@ External sign-in failures show fixed, actionable messages. The intended order
 destination survives a switch to email sign-in or registration. The API's
 [OAUTH.md](https://github.com/Silentmaster86/hiking-store-api/blob/main/OAUTH.md)
 describes state verification, account identity and matching callback configuration.
+
+See [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md) for paired PostgreSQL/browser checks, multi-engine checks, performance artifacts and merge order. [AUDIT-STATUS.md](AUDIT-STATUS.md) tracks the original findings.
 
 ## Hosting and project notes
 
