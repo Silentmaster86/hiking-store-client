@@ -187,17 +187,23 @@ async function fillCheckout(page) {
       fixture.user = null;
       await page.goto(`https://hiking.test/login?${new URLSearchParams({ returnTo: destination })}`);
       await page.getByRole("link", { name: "Create one" }).click();
+      await page.getByRole("heading", { name: "Create account", exact: true }).waitFor();
+      await page.waitForURL("**/register?**");
       await page.reload();
+      await page.getByRole("heading", { name: "Create account", exact: true }).waitFor();
       await page.locator("#email").fill("buyer@example.com");
       await page.locator("#password").fill("a secure test password");
       await page.getByRole("button", { name: "Create account", exact: true }).click();
       await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
       assert.equal(new URL(page.url()).pathname, destination);
+    });
+    console.log("PASS: OAuth feedback, safe return paths and email/registration fallback preserve the order destination");
+    await scenario(browser, async (page) => {
       await page.goto("https://hiking.test/login?returnTo=https%3A%2F%2Fexample.com");
       const safeLink = await page.getByRole("link", { name: "Continue with Google" }).getAttribute("href");
       assert.equal(new URL(safeLink, "https://hiking.test").searchParams.get("returnTo"), "/");
     });
-    console.log("PASS: OAuth feedback, safe return paths and email/registration fallback preserve the order destination");
+    console.log("PASS: external sign-in return destinations are rejected");
     await scenario(browser, async (page, fixture) => {
       fixture.failAuth = true;
       await page.goto("https://hiking.test/orders");

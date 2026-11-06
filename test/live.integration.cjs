@@ -2,7 +2,8 @@
 const assert = require("node:assert/strict");
 const { spawn, spawnSync } = require("node:child_process");
 const path = require("node:path"), fs = require("node:fs");
-const { chromium } = require("playwright");
+const playwright = require("playwright");
+const browserType = playwright[process.env.BROWSER || "chromium"];
 const apiDirectory = path.resolve(process.env.E2E_API_DIR || "../api");
 const { Pool } = require(path.join(apiDirectory, "node_modules/pg"));
 const base = "http://127.0.0.1:4173";
@@ -39,7 +40,7 @@ async function main() {
   await waitFor("http://127.0.0.1:4000/ready");
   start(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--host", "127.0.0.1", "--port", "4173", "--strictPort"], process.cwd());
   await waitFor(base);
-  const browser = await chromium.launch({ headless: true });
+  const browser = await browserType.launch({ headless: true });
   const context = await browser.newContext(), page = await context.newPage();
   const errors = []; page.on("pageerror", error => errors.push(error.message));
   page.setDefaultTimeout(15000);
@@ -66,6 +67,7 @@ async function main() {
     await strangerPage.getByRole("heading", { name: "We couldn’t display this order", exact: true }).waitFor(); await stranger.close();
     await page.getByRole("link", { name: "Sign in to save this order to your account" }).click();
     await page.getByRole("link", { name: "Create one", exact: true }).click();
+    await page.getByRole("heading", { name: "Create account", exact: true }).waitFor();
     await page.locator("#email").fill("e2e@example.com"); await page.locator("#password").fill("a secure integration password");
     await page.getByRole("button", { name: "Create account", exact: true }).click();
     await page.getByRole("button", { name: "Save order to my account", exact: true }).click();
@@ -93,15 +95,15 @@ async function main() {
     assert.deepEqual(errors, []);
     fs.mkdirSync("artifacts", { recursive: true });
     await page.screenshot({ path: "artifacts/product-mobile.png", fullPage: true });
-    fs.writeFileSync("artifacts/integration-result.json", JSON.stringify({ passed: true, database: "isolated PostgreSQL", browser: "Chromium", mockedApi: false, checks: ["search", "details", "cart", "checkout", "guest reload/new tab", "stranger denied", "register/claim", "request protection", "no cart duplication", "mobile width"] }, null, 2));
+    fs.writeFileSync("artifacts/integration-result.json", JSON.stringify({ passed: true, database: "isolated PostgreSQL", browser: process.env.BROWSER || "chromium", mockedApi: false, checks: ["search", "details", "cart", "checkout", "guest reload/new tab", "stranger denied", "register/claim", "request protection", "no cart duplication", "mobile width"] }, null, 2));
     console.log("PASS real integration: browser + API + PostgreSQL, guest order claim, request protection and persistent cart");
     if (process.env.RUN_LIGHTHOUSE === "true") {
       const cli = path.join(process.cwd(), "node_modules/lighthouse/cli/index.js");
-      const result = spawnSync(process.execPath, [cli, base, "--chrome-flags=--headless --no-sandbox --disable-dev-shm-usage", "--output=json", "--output=html", "--output-path=artifacts/lighthouse", "--quiet"], { env: { ...env, CHROME_PATH: chromium.executablePath() }, encoding: "utf8", timeout: 120000 });
+      const result = spawnSync(process.execPath, [cli, base, "--chrome-flags=--headless --no-sandbox --disable-dev-shm-usage", "--output=json", "--output=html", "--output-path=artifacts/lighthouse", "--quiet"], { env: { ...env, CHROME_PATH: playwright.chromium.executablePath() }, encoding: "utf8", timeout: 120000 });
       assert.equal(result.status, 0, "Lighthouse lab measurement completes");
       console.log("PASS Lighthouse lab reports saved; scores describe this CI environment only");
     }
-  } finally { await browser.close(); }
+  } catch (error) { console.error("Integration URL:", page.url(), "Browser errors:", errors); try { console.error((await page.locator("body").innerText({ timeout: 1000 })).slice(0, 2500)); } catch { /* Keep the original error. */ } throw error; } finally { await browser.close(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   for (const child of processes.reverse()) { child.kill("SIGTERM"); await new Promise(resolve => { if (child.exitCode !== null) return resolve(); const timer = setTimeout(() => { child.kill("SIGKILL"); resolve(); }, 12000); child.once("exit", () => { clearTimeout(timer); resolve(); }); }); }
