@@ -29,6 +29,8 @@ claiming, sign-out/sign-in and request protection. Real OAuth accounts are not u
 
 The workflow produces an integration JSON result, a mobile screenshot and mobile
 Lighthouse HTML/JSON lab reports under the integration-and-lighthouse artifact.
+A separate deployment-observation.json records the current public site, proxy-session persistence with browser third-party cookie restrictions where supported, and provider redirect configuration. It may create one empty guest cart, never an order or account. This observation does not gate feature CI because the feature is not yet deployed. It does not verify real provider sign-in.
+
 The score measures a CI machine/local server, not production Core Web Vitals or
 physical-device performance. The weekly schedule checks API main; manual workflow
 inputs can select another API ref. Update the pin deliberately when the API

@@ -74,6 +74,11 @@ jobs:
         working-directory: client
       - run: npm run test:e2e
         working-directory: client
+      - name: Observe current deployment
+        if: ${{ always() && matrix.browser == 'chromium' }}
+        continue-on-error: true
+        run: node test/deployment.observe.cjs
+        working-directory: client
       - uses: actions/upload-artifact@v4
         if: always()
         with:
