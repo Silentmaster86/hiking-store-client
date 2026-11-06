@@ -85,7 +85,7 @@ export default function CheckoutPage() {
       }
       const next = localFieldErrors(err.fieldErrors);
       setErrors(next);
-      setError(err.message === "Failed to fetch" ? "We couldn’t confirm the result. Retry to safely check the same order attempt." : err.message || "Checkout failed. Please try again.");
+      setError(["NETWORK_ERROR", "REQUEST_TIMEOUT"].includes(err.code) || err.message === "Failed to fetch" ? "We couldn’t confirm the result. Retry to safely check the same order attempt." : err.message || "Checkout failed. Please try again.");
       focusError(next);
       // Validation failures occur before an order is created.
       if (err.status === 422) forgetAttempt();
