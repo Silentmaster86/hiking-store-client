@@ -7,18 +7,19 @@ import GlobalStyles from "./styles/GlobalStyles.js";
 import theme from "./styles/theme.js";
 import { CartProvider } from "./context/CartContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import AppErrorBoundary from "./components/ui/AppErrorBoundary.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <BrowserRouter>
+      <AppErrorBoundary><BrowserRouter>
         <AuthProvider>
           <CartProvider>
             <App />
           </CartProvider>
         </AuthProvider>
-      </BrowserRouter>
+      </BrowserRouter></AppErrorBoundary>
     </ThemeProvider>
   </React.StrictMode>
 );

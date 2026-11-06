@@ -15,10 +15,10 @@ async function scenario(browser, run) {
     const request = route.request(), url = new URL(request.url()), p = url.pathname;
     let data, status = 200;
     if (p.startsWith("/api/")) {
-      if (p === "/api/auth/me") { if (fixture.authGate) await fixture.authGate; data = { user: fixture.user }; }
+      if (p === "/api/auth/me") { if (fixture.authGate) await fixture.authGate; if (fixture.failAuth) { status = 503; data = { error: "Unavailable" }; } else data = { user: fixture.user }; }
       else if ((p === "/api/auth/login" || p === "/api/auth/register")) { fixture.user = { id: 7, email: "buyer@example.com" }; data = { user: fixture.user }; }
       else if (p === "/api/auth/logout") { fixture.user = null; data = { ok: true }; }
-      else if (p === "/api/cart") data = { cartId: 1, items: fixture.items };
+      else if (p === "/api/cart") data = { cartId: 1, items: fixture.items, maxQuantity: 99, notice: fixture.notice };
       else if (p === "/api/products") { fixture.productRequests++; if (fixture.failProducts) { status = 503; data = { error: "Internal test details" }; } else data = [product]; }
       else if (p === "/api/checkout") {
         fixture.posts++; fixture.keys.push(request.headers()["idempotency-key"]);
@@ -197,5 +197,21 @@ async function fillCheckout(page) {
       assert.equal(new URL(safeLink, "https://hiking.test").searchParams.get("returnTo"), "/");
     });
     console.log("PASS: OAuth feedback, safe return paths and email/registration fallback preserve the order destination");
+    await scenario(browser, async (page, fixture) => {
+      fixture.failAuth = true;
+      await page.goto("https://hiking.test/orders");
+      await page.getByRole("alert").filter({ hasText: "couldn’t check your sign-in status" }).waitFor();
+      assert.equal(new URL(page.url()).pathname, "/orders", "An API outage is not a logged-out response");
+      fixture.failAuth = false; fixture.user = { id: 7, email: "buyer@example.com" };
+      await page.getByRole("button", { name: "Retry connection" }).click();
+      await page.locator("header").getByRole("button", { name: "Sign out", exact: true }).waitFor();
+      assert.equal(await page.getByRole("button", { name: "Retry connection" }).count(), 0);
+      fixture.items[0].quantity = 99;
+      fixture.notice = "Some quantities were reduced to the limit of 99 per product. Please review your cart before checkout.";
+      await page.goto("https://hiking.test/cart");
+      await page.getByRole("status").filter({ hasText: "reduced to the limit" }).waitFor();
+      assert.equal(await page.getByRole("button", { name: "Increase quantity of Test Backpack" }).isDisabled(), true);
+    });
+    console.log("PASS: session outage recovery and quantity-limit feedback");
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });

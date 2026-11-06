@@ -5,6 +5,7 @@ import CartDrawer from "../ui/CartDrawer";
 import Footer from "./Footer";
 import DemoNotice from "./DemoNotice";
 import PageMetadata from "./PageMetadata";
+import SessionNotice from "./SessionNotice";
 const Shell = styled.div`min-height: 100vh; display: flex; flex-direction: column;`;
 const Main = styled.main`
   max-width: ${({ theme }) => theme.container.max}; margin: 0 auto;
@@ -17,6 +18,6 @@ const SkipLink = styled.a`
 `;
 export default function Layout() {
   return <Shell><PageMetadata /><SkipLink href="#main-content">Skip to content</SkipLink>
-    <Navbar /><DemoNotice /><Main id="main-content" tabIndex={-1}><Outlet /></Main><Footer /><CartDrawer />
+    <Navbar /><DemoNotice /><SessionNotice /><Main id="main-content" tabIndex={-1}><Outlet /></Main><Footer /><CartDrawer />
   </Shell>;
 }

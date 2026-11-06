@@ -270,6 +270,8 @@ export default function CartDrawer() {
     open,
     closeCart,
     items,
+    notice,
+    maxQuantity,
     status,
     error,
     refresh,
@@ -298,6 +300,7 @@ export default function CartDrawer() {
         </Head>
 
         <List>
+          {notice && <p role="status">{notice}</p>}
           {status === "error" && <ErrorBox role="alert">{error || "Could not load your cart."}<CloseBtn type="button" onClick={refresh}>Refresh cart</CloseBtn></ErrorBox>}
 
           {/* ✅ Skeleton gdy jeszcze nie mamy items */}
@@ -325,7 +328,7 @@ export default function CartDrawer() {
                         −
                       </QtyBtn>
                       <QtyVal>{it.quantity}</QtyVal>
-                      <QtyBtn type="button" disabled={busy} aria-label={`Increase quantity of ${it.name}`} onClick={() => setQty(id, it.quantity + 1)}>
+                      <QtyBtn type="button" disabled={busy || it.quantity >= maxQuantity} aria-label={`Increase quantity of ${it.name}`} onClick={() => setQty(id, it.quantity + 1)}>
                         +
                       </QtyBtn>
                     </Qty>

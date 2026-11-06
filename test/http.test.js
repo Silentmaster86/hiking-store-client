@@ -33,3 +33,22 @@ test("allows empty successful responses", async () => {
   globalThis.fetch = async () => new Response(null, { status: 204 });
   assert.equal(await apiRequest("/cart/items/1", { method: "DELETE" }), null);
 });
+test("a timed-out write is aborted and never automatically retried", async () => {
+  let calls = 0;
+  globalThis.fetch = (_url, options) => new Promise((_resolve, reject) => {
+    calls++;
+    options.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+  });
+  await assert.rejects(apiRequest("/checkout", { method: "POST", body: "{}", timeoutMs: 5 }), error => error.code === "REQUEST_TIMEOUT");
+  assert.equal(calls, 1);
+});
+test("caller cancellation and network failures have distinct results", async () => {
+  const controller = new AbortController();
+  globalThis.fetch = (_url, options) => new Promise((_resolve, reject) => {
+    options.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+  });
+  const pending = apiGet("/products", { signal: controller.signal }); controller.abort();
+  await assert.rejects(pending, error => error.name === "AbortError");
+  globalThis.fetch = async () => { throw new TypeError("Private network details"); };
+  await assert.rejects(apiGet("/products"), error => error.code === "NETWORK_ERROR" && !error.message.includes("Private"));
+});

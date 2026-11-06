@@ -1,8 +1,8 @@
 import { apiRequest } from "./http";
 
 // GET /cart -> { cartId, items: [...] }
-export function getCart() {
-  return apiRequest("/cart", { method: "GET" });
+export function getCart(options = {}) {
+  return apiRequest("/cart", { ...options, method: "GET" });
 }
 
 // POST /cart/items -> body: { productId, quantity }

@@ -5,7 +5,8 @@ export default function RequireAuth({ children }) {
   const { user, status } = useAuth();
   const location = useLocation();
 
-  if (status === "loading") return null; // albo spinner
+  if (status === "loading") return <p role="status">Checking your sign-in status…</p>;
+  if (status === "error") return <p>Your account pages will be available once the connection is restored.</p>;
   if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
 
   return children;
