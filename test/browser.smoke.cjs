@@ -1,5 +1,5 @@
 // Optional browser checks. CI installs a pinned Playwright tool separately.
-const { chromium } = require("playwright");
+const browserType = require("playwright")[process.env.BROWSER || "chromium"];
 const fs = require("node:fs");
 const path = require("node:path");
 const assert = require("node:assert/strict");
@@ -19,6 +19,7 @@ async function scenario(browser, run) {
       else if ((p === "/api/auth/login" || p === "/api/auth/register")) { fixture.user = { id: 7, email: "buyer@example.com" }; data = { user: fixture.user }; }
       else if (p === "/api/auth/logout") { fixture.user = null; data = { ok: true }; }
       else if (p === "/api/cart") data = { cartId: 1, items: fixture.items, maxQuantity: 99, notice: fixture.notice };
+      else if (p === "/api/products/1") data = { ...product, details: "Illustrative demo backpack", specifications: { Category: "Backpacks & Accessories" } };
       else if (p === "/api/products") { fixture.productRequests++; if (fixture.failProducts) { status = 503; data = { error: "Internal test details" }; } else data = [product]; }
       else if (p === "/api/checkout") {
         fixture.posts++; fixture.keys.push(request.headers()["idempotency-key"]);
@@ -47,7 +48,7 @@ async function fillCheckout(page) {
   for (const [id, value] of Object.entries({ email: "buyer@example.com", firstName: "Jan", lastName: "Kowalski", address1: "10 Test Road", city: "London", postcode: "sw1a1aa" })) await page.locator(`#${id}`).fill(value);
 }
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await browserType.launch({ headless: true });
   try {
     await scenario(browser, async (page, fixture) => {
       await page.goto("https://hiking.test/checkout");
@@ -213,5 +214,26 @@ async function fillCheckout(page) {
       assert.equal(await page.getByRole("button", { name: "Increase quantity of Test Backpack" }).isDisabled(), true);
     });
     console.log("PASS: session outage recovery and quantity-limit feedback");
+    await scenario(browser, async (page) => {
+      await page.goto("https://hiking.test/products?category=backpacks&q=backpack&sort=price-asc");
+      await page.getByRole("heading", { name: "Test Backpack", exact: true }).waitFor();
+      assert.equal(await page.getByLabel("Search products").inputValue(), "backpack");
+      assert.equal(await page.getByLabel("Sort by").inputValue(), "price-asc");
+      await page.getByLabel("Search products").fill("missing");
+      await page.getByRole("status").filter({ hasText: "0 products found" }).waitFor();
+      await page.reload();
+      assert.equal(await page.getByLabel("Search products").inputValue(), "missing");
+      await page.getByRole("button", { name: "Clear filters" }).click();
+      await page.getByRole("link", { name: "Test Backpack", exact: true }).click();
+      await page.getByRole("heading", { name: "Test Backpack", exact: true }).waitFor();
+      await page.waitForFunction(() => document.title === "Test Backpack — Hiking Store");
+      await page.reload();
+      await page.getByRole("heading", { name: "About this item", exact: true }).waitFor();
+      await page.goto("https://hiking.test/products/999");
+      await page.getByRole("heading", { name: "Product not found", exact: true }).waitFor();
+      await page.getByRole("link", { name: "Browse all products", exact: true }).click();
+      await page.waitForFunction(() => document.title === "All products — Hiking Store");
+    });
+    console.log("PASS: catalogue URL filters, sorting, product deep links, metadata and missing-product recovery");
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });

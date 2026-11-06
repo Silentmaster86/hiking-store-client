@@ -6,6 +6,6 @@ export function pageMetadata(pathname, search = "") {
     "/cart": "Your cart", "/checkout": "Checkout", "/login": "Sign in", "/register": "Create account",
     "/orders": "Your orders", "/privacy": "Privacy policy", "/terms": "Terms of use", "/data-deletion": "Delete your data", "/about": "About this demo",
   };
-  const name = names[pathname] || (/^\/order\/[^/]+\/confirmation$/.test(pathname) ? "Order confirmation" : /^\/orders\/[^/]+$/.test(pathname) ? "Order details" : "Page not found");
+  const name = names[pathname] || (/^\/products\/[^/]+$/.test(pathname) ? "Product details" : /^\/order\/[^/]+\/confirmation$/.test(pathname) ? "Order confirmation" : /^\/orders\/[^/]+$/.test(pathname) ? "Order details" : "Page not found");
   return { title: pathname === "/" ? name : `${name} — Hiking Store`, description: "Explore hiking footwear, jackets, backpacks and outdoor accessories in this portfolio demo. No real payments or deliveries." };
 }
