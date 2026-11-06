@@ -45,6 +45,7 @@ async function main() {
   const errors = []; page.on("pageerror", error => errors.push(error.message));
   page.setDefaultTimeout(15000);
   try {
+    await page.waitForLoadState("networkidle");
     await page.goto(base + "/products?q=torch&sort=price-asc");
     await page.getByRole("link", { name: "300 lm Head Torch", exact: true }).click();
     await page.getByRole("heading", { name: "300 lm Head Torch", exact: true }).waitFor();
@@ -74,6 +75,7 @@ async function main() {
     await page.getByRole("button", { name: "Save order to my account", exact: true }).waitFor({ state: "hidden" });
     await page.getByRole("link", { name: "View full order details" }).click();
     await page.getByRole("heading", { name: /^Order #/ }).waitFor();
+    await page.waitForLoadState("networkidle");
     await page.goto(base + "/products?q=torch");
     await page.getByRole("button", { name: "Add to cart", exact: true }).click();
     await cart.waitFor(); await page.keyboard.press("Escape");

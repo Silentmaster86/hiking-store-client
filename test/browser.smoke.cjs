@@ -171,6 +171,7 @@ async function fillCheckout(page) {
     await scenario(browser, async (page, fixture) => {
       fixture.order = { id: 1, status: "pending", currency: "GBP", created_at: "2026-11-05T12:00:00Z", subtotal_cents: 1499, shipping_cents: 0, total_cents: 1499 };
       const destination = "/order/1/confirmation";
+      await page.waitForLoadState("networkidle");
       await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason: "cancelled", returnTo: destination })}`);
       await page.getByRole("alert").filter({ hasText: "Google sign-in was cancelled" }).waitFor();
       const googleLink = await page.getByRole("link", { name: "Continue with Google" }).getAttribute("href");
@@ -181,14 +182,17 @@ async function fillCheckout(page) {
       await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
       assert.equal(new URL(page.url()).pathname, destination);
       for (const [reason, expected] of [["session", "expired"], ["account_conflict", "original method"], ["unverified_email", "Verify it with Google"], ["unavailable", "unavailable"], ["__proto__", "failed"]]) {
-        await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason })}`);
+        await page.waitForLoadState("networkidle");
+      await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason })}`);
         await page.getByRole("alert").filter({ hasText: expected }).waitFor();
       }
       fixture.user = null;
+      await page.waitForLoadState("networkidle");
       await page.goto(`https://hiking.test/login?${new URLSearchParams({ returnTo: destination })}`);
       await page.getByRole("link", { name: "Create one" }).click();
       await page.getByRole("heading", { name: "Create account", exact: true }).waitFor();
       await page.waitForURL("**/register?**");
+      await page.waitForLoadState("networkidle");
       await page.reload();
       await page.getByRole("heading", { name: "Create account", exact: true }).waitFor();
       await page.locator("#email").fill("buyer@example.com");
