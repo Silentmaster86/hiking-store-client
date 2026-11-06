@@ -39,7 +39,7 @@ jobs:
       BROWSER: ${{ matrix.browser }}
       RUN_LIGHTHOUSE: ${{ matrix.browser == 'chromium' && 'true' || 'false' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: client
       - name: Select reproducible API version
@@ -53,7 +53,7 @@ jobs:
             [[ "$api_ref" =~ ^[a-f0-9]{40}$ ]] || exit 1
           fi
           echo "ref=$api_ref" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: Silentmaster86/hiking-store-api
           ref: ${{ inputs.api_ref || steps.api.outputs.ref }}
