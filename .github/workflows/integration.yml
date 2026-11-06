@@ -1,7 +1,7 @@
 name: Store integration
 on:
   push:
-    branches: [main, 'feat/**']
+    branches: [main]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -11,6 +11,9 @@ on:
         type: string
   schedule:
     - cron: '30 6 * * 1'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   integration:
     strategy:
