@@ -16,7 +16,7 @@ async function scenario(browser, run) {
     let data, status = 200;
     if (p.startsWith("/api/")) {
       if (p === "/api/auth/me") { if (fixture.authGate) await fixture.authGate; data = { user: fixture.user }; }
-      else if (p === "/api/auth/login") { fixture.user = { id: 7, email: "buyer@example.com" }; data = { user: fixture.user }; }
+      else if ((p === "/api/auth/login" || p === "/api/auth/register")) { fixture.user = { id: 7, email: "buyer@example.com" }; data = { user: fixture.user }; }
       else if (p === "/api/auth/logout") { fixture.user = null; data = { ok: true }; }
       else if (p === "/api/cart") data = { cartId: 1, items: fixture.items };
       else if (p === "/api/products") { fixture.productRequests++; if (fixture.failProducts) { status = 503; data = { error: "Internal test details" }; } else data = [product]; }
@@ -167,5 +167,35 @@ async function fillCheckout(page) {
       }
     });
     console.log("PASS: mobile menu survives auth lookup, traps focus, handles Escape and narrow viewports");
+    await scenario(browser, async (page, fixture) => {
+      fixture.order = { id: 1, status: "pending", currency: "GBP", created_at: "2026-11-05T12:00:00Z", subtotal_cents: 1499, shipping_cents: 0, total_cents: 1499 };
+      const destination = "/order/1/confirmation";
+      await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason: "cancelled", returnTo: destination })}`);
+      await page.getByRole("alert").filter({ hasText: "Google sign-in was cancelled" }).waitFor();
+      const googleLink = await page.getByRole("link", { name: "Continue with Google" }).getAttribute("href");
+      assert.equal(new URL(googleLink, "https://hiking.test").searchParams.get("returnTo"), destination);
+      await page.locator("#email").fill("buyer@example.com");
+      await page.locator("#password").fill("test password");
+      await page.getByRole("button", { name: "Sign in", exact: true }).click();
+      await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
+      assert.equal(new URL(page.url()).pathname, destination);
+      for (const [reason, expected] of [["session", "expired"], ["account_conflict", "original method"], ["unverified_email", "Verify it with Google"], ["unavailable", "unavailable"], ["__proto__", "failed"]]) {
+        await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason })}`);
+        await page.getByRole("alert").filter({ hasText: expected }).waitFor();
+      }
+      fixture.user = null;
+      await page.goto(`https://hiking.test/login?${new URLSearchParams({ returnTo: destination })}`);
+      await page.getByRole("link", { name: "Create one" }).click();
+      await page.reload();
+      await page.locator("#email").fill("buyer@example.com");
+      await page.locator("#password").fill("a secure test password");
+      await page.getByRole("button", { name: "Create account", exact: true }).click();
+      await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
+      assert.equal(new URL(page.url()).pathname, destination);
+      await page.goto("https://hiking.test/login?returnTo=https%3A%2F%2Fexample.com");
+      const safeLink = await page.getByRole("link", { name: "Continue with Google" }).getAttribute("href");
+      assert.equal(new URL(safeLink, "https://hiking.test").searchParams.get("returnTo"), "/");
+    });
+    console.log("PASS: OAuth feedback, safe return paths and email/registration fallback preserve the order destination");
   } finally { await browser.close(); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });

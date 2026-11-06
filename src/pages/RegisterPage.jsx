@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { validateRegistration } from "../validation/auth";
 import { useAuth } from "../context/auth-context";
+import { authReturnTo } from "../utils/authNavigation";
 
 const Wrap = styled.div`
   max-width: 520px;
@@ -110,6 +111,8 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const nav = useNavigate();
   const location = useLocation();
+  const [params] = useSearchParams();
+  const from = authReturnTo(location.state?.from, params.get("returnTo"));
 
   const [form, setForm] = useState({
     email: "",
@@ -142,8 +145,7 @@ export default function RegisterPage() {
         firstName: form.firstName.trim() || null,
         lastName: form.lastName.trim() || null,
       });
-      const previous = location.state?.from;
-      nav(previous?.pathname ? `${previous.pathname}${previous.search || ""}${previous.hash || ""}` : "/", { replace: true });
+      nav(from, { replace: true });
     } catch (err) {
       setError(err?.message || "Registration failed.");
       setFieldErrors(err.fieldErrors || {});
@@ -156,7 +158,7 @@ export default function RegisterPage() {
     <Wrap>
       <H1>Create account</H1>
       <Muted>
-        Already have an account? <Link to="/login" state={location.state}>Sign in</Link>
+        Already have an account? <Link to={`/login?${new URLSearchParams({ returnTo: from })}`} state={location.state}>Sign in</Link>
       </Muted>
 
       <Card>

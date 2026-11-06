@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../context/auth-context";
+import { authReturnTo, oauthError } from "../utils/authNavigation";
 
 
 const Wrap = styled.div`
@@ -156,8 +157,8 @@ export default function LoginPage() {
   const nav = useNavigate();
   const location = useLocation();
   
-  const previous = location.state?.from;
-  const from = previous?.pathname ? `${previous.pathname}${previous.search || ""}${previous.hash || ""}` : "/";
+  const [params] = useSearchParams();
+  const from = authReturnTo(location.state?.from, params.get("returnTo"));
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -165,11 +166,7 @@ export default function LoginPage() {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
   
-  const [params] = useSearchParams();
-  
-  const providerError = params.get("error");
-  const visibleError = error || (providerError === "google" ? "Google sign-in failed. Please try again."
-    : providerError === "facebook" ? "Facebook sign-in failed. Please try again." : "");
+  const visibleError = error || oauthError(params.get("error"), params.get("reason"));
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -189,12 +186,12 @@ export default function LoginPage() {
     <Wrap>
       <H1>Sign in</H1>
       <Muted>
-        Don't have an account? <Link to="/register" state={location.state}>Create one</Link>
+        Don't have an account? <Link to={`/register?${new URLSearchParams({ returnTo: from })}`} state={location.state}>Create one</Link>
       </Muted>
 
       <Card>
         <form onSubmit={onSubmit}>
-          {visibleError && <ErrorBox>{visibleError}</ErrorBox>}
+          {visibleError && <ErrorBox role="alert">{visibleError}</ErrorBox>}
 
           <Field>
             <Label htmlFor="email">Email</Label>

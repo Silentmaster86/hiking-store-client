@@ -53,6 +53,10 @@ npm run test:browser
 Browser checks use the built app with API fixtures; real PostgreSQL/session flows
 are tested in the API repository. They do not validate live Google/Facebook account
 configuration. [ORDER-FLOWS.md](ORDER-FLOWS.md) documents the order flow and limits.
+External sign-in failures show fixed, actionable messages. The intended order
+destination survives a switch to email sign-in or registration. The API's
+[OAUTH.md](https://github.com/Silentmaster86/hiking-store-api/blob/main/OAUTH.md)
+describes state verification, account identity and matching callback configuration.
 
 ## Hosting and project notes
 
