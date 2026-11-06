@@ -82,7 +82,7 @@ jobs:
         continue-on-error: true
         run: node test/deployment.observe.cjs
         working-directory: client
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: integration-and-lighthouse-${{ matrix.browser }}
