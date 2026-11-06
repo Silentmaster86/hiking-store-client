@@ -52,3 +52,11 @@ test("caller cancellation and network failures have distinct results", async () 
   globalThis.fetch = async () => { throw new TypeError("Private network details"); };
   await assert.rejects(apiGet("/products"), error => error.code === "NETWORK_ERROR" && !error.message.includes("Private"));
 });
+test("mutations include the browser request-verification header", async () => {
+  globalThis.fetch = async (_url, options) => {
+    assert.equal(options.headers["X-Store-Request"], "1");
+    return new Response("{}");
+  };
+  await apiRequest("/auth/login", { method: "POST", body: "{}" });
+  await apiRequest("/cart/items/1", { method: "DELETE" });
+});

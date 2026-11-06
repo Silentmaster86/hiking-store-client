@@ -15,6 +15,7 @@ export async function apiRequest(path, options = {}) {
     signal: controller.signal,
     headers: {
       ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(!["GET", "HEAD", "OPTIONS"].includes((options.method || "GET").toUpperCase()) ? { "X-Store-Request": "1" } : {}),
       ...(options.headers || {}),
     },
   });
