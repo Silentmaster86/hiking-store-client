@@ -8,7 +8,7 @@ Use each PR's Checks for the result for its exact commit.
 | Original findings | Implementation and verification |
 | --- | --- |
 | 1, 8–9, 39–40: build, cart/404 routes, checks, docs | Implemented. Build/lint/unit/CI and direct-route browser checks. |
-| 2: cross-site cookies | Proxy/defaults and matching configuration documented. Owner must confirm live cookies and provider callbacks with third-party cookies blocked. |
+| 2: cross-site cookies | Proxy/defaults and matching configuration documented. CI observation confirms proxy session persistence with third-party cookies blocked, but deployed app traffic/callbacks still use Render. Owner cutover settings are listed in DEPLOYMENT-SETTINGS.md. |
 | 3–7, 13–16, 22: identity, checkout, guest orders, demo statuses | Implemented. PostgreSQL integration, fixture browser suite and real combined integration. |
 | 10–12: cart writes and catalogue failures | Implemented with pending-write protection, explicit recovery and generic errors. |
 | 17: password reset | Optional product expansion; no email service or reset endpoint added. |

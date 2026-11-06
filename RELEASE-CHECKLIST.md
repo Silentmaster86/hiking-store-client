@@ -22,14 +22,14 @@ checkout recovery, OAuth feedback, session outages and catalogue deep links.
 
 Store integration checks out the API SHA in .github/integration-api-ref, installs
 both projects and uses an empty, local PostgreSQL database ending in _e2e. It never
-resets an existing database. It starts the actual API and Vite preview proxy; no
+resets an existing database. It starts the actual API and Vite preview proxy in Chromium, Firefox and WebKit; no
 API routes are mocked. The browser checks search/details, cart quantities, guest
 checkout, same-session reload/new tab, denial to another browser, registration,
 claiming, sign-out/sign-in and request protection. Real OAuth accounts are not used.
 
 The workflow produces an integration JSON result, a mobile screenshot and mobile
 Lighthouse HTML/JSON lab reports under the integration-and-lighthouse artifact.
-A separate deployment-observation.json records the current public site, proxy-session persistence with browser third-party cookie restrictions where supported, and provider redirect configuration. It may create one empty guest cart, never an order or account. This observation does not gate feature CI because the feature is not yet deployed. It does not verify real provider sign-in.
+A separate deployment-observation.json records the current public site, proxy-session persistence with browser third-party cookie restrictions where supported, and provider redirect configuration. Normal cart reads may create empty guest carts, never an order or account. This observation does not gate feature CI because the feature is not yet deployed. It does not verify real provider sign-in.
 
 The score measures a CI machine/local server, not production Core Web Vitals or
 physical-device performance. The weekly schedule checks API main; manual workflow
@@ -42,6 +42,8 @@ and Lighthouse tools from the workflow. Set E2E_DATABASE_URL explicitly, then us
 `npm run test:e2e`. The fixture database is left available for inspection; create
 a new empty database for the next run. Credentials in workflow files are only
 for disposable CI services. No real credentials belong in VITE variables.
+
+See [DEPLOYMENT-SETTINGS.md](DEPLOYMENT-SETTINGS.md) for the observed production mismatch and exact settings.
 
 ## Hosting checks requiring owner access
 

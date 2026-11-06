@@ -51,7 +51,7 @@ async function fillCheckout(page) {
   const browser = await browserType.launch({ headless: true });
   try {
     await scenario(browser, async (page, fixture) => {
-      await page.goto("https://hiking.test/checkout");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/checkout");
       await page.getByRole("button", { name: "Place demo order" }).click();
       await page.locator("#email-error").waitFor();
       assert.equal(fixture.posts, 0, "Invalid form cannot send checkout");
@@ -62,7 +62,7 @@ async function fillCheckout(page) {
       await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
       assert.equal(fixture.keys.length, 2);
       assert.equal(fixture.keys[0], fixture.keys[1], "A failed response must reuse the same key");
-      await page.reload();
+      await page.waitForLoadState("networkidle"); await page.reload();
       await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
       await page.getByRole("link", { name: "Sign in to save this order to your account" }).click();
       await page.locator("#email").fill("buyer@example.com");
@@ -75,22 +75,22 @@ async function fillCheckout(page) {
       assert.equal(fixture.claimed, true);
       await page.getByRole("link", { name: "View full order details" }).click();
       await page.getByRole("heading", { name: "Order #1", exact: true }).waitFor();
-      await page.goto("https://hiking.test/order/999/confirmation");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/order/999/confirmation");
       await page.getByRole("heading", { name: "We couldn’t display this order" }).waitFor();
       assert.equal(await page.getByRole("heading", { name: "Order confirmed", exact: true }).count(), 0);
     });
     console.log("PASS: validation, retry key, confirmation reload, guest claim and unavailable order UI");
     await scenario(browser, async (page, fixture) => {
-      await page.goto("https://hiking.test/checkout"); await fillCheckout(page);
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/checkout"); await fillCheckout(page);
       await page.getByRole("button", { name: "Place demo order" }).click();
       await page.getByRole("alert").filter({ hasText: "Retry to safely check" }).waitFor();
-      await page.reload();
+      await page.waitForLoadState("networkidle"); await page.reload();
       await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
       assert.equal(fixture.posts, 1, "Reload recovers the completed attempt without another POST");
     });
     console.log("PASS: lost response followed by reload recovers the completed order");
     await scenario(browser, async (page) => {
-      await page.goto("https://hiking.test/register");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/register");
       await page.locator("#email").fill("buyer@example.com"); await page.locator("#password").fill("x");
       await page.getByRole("button", { name: "Create account", exact: true }).click();
       await page.locator("#password-error").waitFor();
@@ -99,7 +99,7 @@ async function fillCheckout(page) {
     console.log("PASS: registration password feedback");
     await scenario(browser, async (page, fixture) => {
       await page.setViewportSize({ width: 1280, height: 900 });
-      await page.goto("https://hiking.test/");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/");
       await page.getByRole("heading", { name: "Gear up for the trail." }).waitFor();
       assert.equal(fixture.productRequests, 0, "The static home page does not need a catalogue API request");
       await page.locator("main").getByRole("link", { name: "Backpacks & Accessories" }).click();
@@ -117,7 +117,7 @@ async function fillCheckout(page) {
       await page.getByRole("link", { name: "Delete my data", exact: true }).click();
       await page.getByRole("heading", { name: "Delete your data", exact: true }).waitFor();
       assert.ok((await page.locator("main a[href^='mailto:']").getAttribute("href")).startsWith(contact));
-      await page.goto("https://hiking.test/products");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/products");
       await page.locator("header").getByRole("link", { name: "Sign in", exact: true }).waitFor();
       const trigger = page.locator("header").getByRole("button", { name: /^Cart/ });
       await trigger.click();
@@ -131,7 +131,7 @@ async function fillCheckout(page) {
       await cart.waitFor({ state: "hidden" });
       assert.equal(await trigger.evaluate((element) => document.activeElement === element), true, "Closing the dialog restores focus");
       fixture.failProducts = true;
-      await page.goto("https://hiking.test/products");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/products");
       await page.getByRole("alert").filter({ hasText: "We couldn’t load the products" }).waitFor();
       assert.equal((await page.locator("main").innerText()).includes("Internal test details"), false);
       fixture.failProducts = false;
@@ -143,7 +143,7 @@ async function fillCheckout(page) {
       await page.setViewportSize({ width: 390, height: 844 });
       let releaseAuth;
       fixture.authGate = new Promise((resolve) => { releaseAuth = resolve; });
-      await page.goto("https://hiking.test/");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/");
       const trigger = page.getByRole("button", { name: "Open menu", exact: true });
       await trigger.click();
       const menu = page.getByRole("dialog", { name: "Mobile navigation" });
@@ -172,7 +172,7 @@ async function fillCheckout(page) {
       fixture.order = { id: 1, status: "pending", currency: "GBP", created_at: "2026-11-05T12:00:00Z", subtotal_cents: 1499, shipping_cents: 0, total_cents: 1499 };
       const destination = "/order/1/confirmation";
       await page.waitForLoadState("networkidle");
-      await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason: "cancelled", returnTo: destination })}`);
+      await page.waitForLoadState("networkidle"); await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason: "cancelled", returnTo: destination })}`);
       await page.getByRole("alert").filter({ hasText: "Google sign-in was cancelled" }).waitFor();
       const googleLink = await page.getByRole("link", { name: "Continue with Google" }).getAttribute("href");
       assert.equal(new URL(googleLink, "https://hiking.test").searchParams.get("returnTo"), destination);
@@ -183,17 +183,17 @@ async function fillCheckout(page) {
       assert.equal(new URL(page.url()).pathname, destination);
       for (const [reason, expected] of [["session", "expired"], ["account_conflict", "original method"], ["unverified_email", "Verify it with Google"], ["unavailable", "unavailable"], ["__proto__", "failed"]]) {
         await page.waitForLoadState("networkidle");
-      await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason })}`);
+      await page.waitForLoadState("networkidle"); await page.goto(`https://hiking.test/login?${new URLSearchParams({ error: "google", reason })}`);
         await page.getByRole("alert").filter({ hasText: expected }).waitFor();
       }
       fixture.user = null;
       await page.waitForLoadState("networkidle");
-      await page.goto(`https://hiking.test/login?${new URLSearchParams({ returnTo: destination })}`);
+      await page.waitForLoadState("networkidle"); await page.goto(`https://hiking.test/login?${new URLSearchParams({ returnTo: destination })}`);
       await page.getByRole("link", { name: "Create one" }).click();
       await page.getByRole("heading", { name: "Create account", exact: true }).waitFor();
       await page.waitForURL("**/register?**");
       await page.waitForLoadState("networkidle");
-      await page.reload();
+      await page.waitForLoadState("networkidle"); await page.reload();
       await page.getByRole("heading", { name: "Create account", exact: true }).waitFor();
       await page.locator("#email").fill("buyer@example.com");
       await page.locator("#password").fill("a secure test password");
@@ -203,14 +203,14 @@ async function fillCheckout(page) {
     });
     console.log("PASS: OAuth feedback, safe return paths and email/registration fallback preserve the order destination");
     await scenario(browser, async (page) => {
-      await page.goto("https://hiking.test/login?returnTo=https%3A%2F%2Fexample.com");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/login?returnTo=https%3A%2F%2Fexample.com");
       const safeLink = await page.getByRole("link", { name: "Continue with Google" }).getAttribute("href");
       assert.equal(new URL(safeLink, "https://hiking.test").searchParams.get("returnTo"), "/");
     });
     console.log("PASS: external sign-in return destinations are rejected");
     await scenario(browser, async (page, fixture) => {
       fixture.failAuth = true;
-      await page.goto("https://hiking.test/orders");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/orders");
       await page.getByRole("alert").filter({ hasText: "couldn’t check your sign-in status" }).waitFor();
       assert.equal(new URL(page.url()).pathname, "/orders", "An API outage is not a logged-out response");
       fixture.failAuth = false; fixture.user = { id: 7, email: "buyer@example.com" };
@@ -219,27 +219,27 @@ async function fillCheckout(page) {
       assert.equal(await page.getByRole("button", { name: "Retry connection" }).count(), 0);
       fixture.items[0].quantity = 99;
       fixture.notice = "Some quantities were reduced to the limit of 99 per product. Please review your cart before checkout.";
-      await page.goto("https://hiking.test/cart");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/cart");
       await page.getByRole("status").filter({ hasText: "reduced to the limit" }).waitFor();
       assert.equal(await page.getByRole("button", { name: "Increase quantity of Test Backpack" }).isDisabled(), true);
     });
     console.log("PASS: session outage recovery and quantity-limit feedback");
     await scenario(browser, async (page) => {
-      await page.goto("https://hiking.test/products?category=backpacks&q=backpack&sort=price-asc");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/products?category=backpacks&q=backpack&sort=price-asc");
       await page.getByRole("heading", { name: "Test Backpack", exact: true }).waitFor();
       assert.equal(await page.getByLabel("Search products").inputValue(), "backpack");
       assert.equal(await page.getByLabel("Sort by").inputValue(), "price-asc");
       await page.getByLabel("Search products").fill("missing");
       await page.getByRole("status").filter({ hasText: "0 products found" }).waitFor();
-      await page.reload();
+      await page.waitForLoadState("networkidle"); await page.reload();
       assert.equal(await page.getByLabel("Search products").inputValue(), "missing");
       await page.getByRole("button", { name: "Clear filters" }).click();
       await page.getByRole("link", { name: "Test Backpack", exact: true }).click();
       await page.getByRole("heading", { name: "Test Backpack", exact: true }).waitFor();
       await page.waitForFunction(() => document.title === "Test Backpack — Hiking Store");
-      await page.reload();
+      await page.waitForLoadState("networkidle"); await page.reload();
       await page.getByRole("heading", { name: "About this item", exact: true }).waitFor();
-      await page.goto("https://hiking.test/products/999");
+      await page.waitForLoadState("networkidle"); await page.goto("https://hiking.test/products/999");
       await page.getByRole("heading", { name: "Product not found", exact: true }).waitFor();
       await page.getByRole("link", { name: "Browse all products", exact: true }).click();
       await page.waitForFunction(() => document.title === "All products — Hiking Store");

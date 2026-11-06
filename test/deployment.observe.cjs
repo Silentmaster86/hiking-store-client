@@ -21,11 +21,11 @@ async function main() {
     result.appUsesSameOriginApi = result.appApiOrigins.length > 0 && result.appApiOrigins.every(origin => origin === base);
     result.proxy = await page.evaluate(async () => {
       const read = async path => {
-        try { const response = await fetch(path, { credentials: "include", signal: AbortSignal.timeout(45000) }); return { status: response.status, data: await response.json() }; }
+        try { const response = await fetch(path, { credentials: "include", signal: AbortSignal.timeout(45000) }); let data = null; try { data = await response.json(); } catch { /* Preserve status for non-JSON responses. */ } return { status: response.status, data }; }
         catch { return { status: null }; }
       };
       const health = await read("/api/health"), ready = await read("/api/ready");
-      // This creates at most an empty guest cart; no products or orders are added.
+      // Normal cart reads can create empty guest carts; no products or orders are added.
       const first = await read("/api/cart"), second = await read("/api/cart");
       return { health: health.status, ready: ready.status,
         cartSessionPersists: !!first.data?.cartId && first.data.cartId === second.data?.cartId,

@@ -61,7 +61,7 @@ async function main() {
     await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
     const confirmation = page.url();
     assert.equal((await context.request.get(base + "/api/cart").then(r => r.json())).items.length, 0);
-    await page.reload(); await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
+    await page.waitForLoadState("networkidle"); await page.reload(); await page.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor();
     const anotherTab = await context.newPage(); await anotherTab.goto(confirmation);
     await anotherTab.getByRole("heading", { name: "Order confirmed", exact: true }).waitFor(); await anotherTab.close();
     const stranger = await browser.newContext(), strangerPage = await stranger.newPage(); await strangerPage.goto(confirmation);
