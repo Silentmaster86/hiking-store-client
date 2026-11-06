@@ -9,7 +9,7 @@ async function main() {
     const context = await browser.newContext(), page = await context.newPage();
     const origins = new Set(), errors = [];
     page.on("pageerror", error => errors.push(error.message.slice(0, 500)));
-    page.on("request", request => { const url = new URL(request.url()); if (/\\/(auth\\/me|cart)(\\?|$)/.test(url.pathname)) origins.add(url.origin); });
+    page.on("request", request => { const url = new URL(request.url()); if (["/auth/me", "/cart", "/api/auth/me", "/api/cart"].includes(url.pathname)) origins.add(url.origin); });
     try {
       const client = await context.newCDPSession(page); await client.send("Network.enable");
       await client.send("Network.setCookieControls", { enableThirdPartyCookieRestriction: true, disableThirdPartyCookieMetadata: true, disableThirdPartyCookieHeuristics: true });
