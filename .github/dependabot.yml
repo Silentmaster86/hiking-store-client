@@ -12,8 +12,18 @@ updates:
           - react-dom
           - "@types/react"
           - "@types/react-dom"
+      lint-tooling:
+        patterns:
+          - eslint
+          - "@eslint/*"
+          - "eslint-plugin-*"
+          - globals
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      ci-actions:
+        patterns:
+          - "*"
