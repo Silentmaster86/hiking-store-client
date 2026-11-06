@@ -44,7 +44,7 @@ npm run verify
 Optional browser checks use the pinned tool configured in CI:
 
 ```sh
-npm install --no-save --package-lock=false playwright@1.56.1
+npm install --no-save --package-lock=false playwright@1.65.0
 npx playwright install --with-deps chromium
 npm run test:browser
 ```

@@ -71,7 +71,7 @@ jobs:
         working-directory: client
       - run: npm run build
         working-directory: client
-      - run: npm install --no-save --package-lock=false playwright@1.56.1 lighthouse@12.8.2
+      - run: npm install --no-save --package-lock=false playwright@1.65.0 lighthouse@12.8.2
         working-directory: client
       - run: npx playwright install --with-deps ${{ matrix.browser }}
         working-directory: client

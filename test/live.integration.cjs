@@ -42,6 +42,9 @@ async function main() {
   await waitFor(base);
   const browser = await browserType.launch({ headless: true });
   const context = await browser.newContext(), page = await context.newPage();
+  const navigation = [];
+  page.on("request", request => { if (request.isNavigationRequest()) navigation.push(["request", new URL(request.url()).pathname]); });
+  page.on("response", response => { if (response.request().isNavigationRequest()) navigation.push(["response", new URL(response.url()).pathname, response.status()]); });
   const errors = []; page.on("pageerror", error => errors.push(error.message));
   page.setDefaultTimeout(15000);
   try {
@@ -103,9 +106,12 @@ async function main() {
       const cli = path.join(process.cwd(), "node_modules/lighthouse/cli/index.js");
       const result = spawnSync(process.execPath, [cli, base, "--chrome-flags=--headless --no-sandbox --disable-dev-shm-usage", "--output=json", "--output=html", "--output-path=artifacts/lighthouse", "--quiet"], { env: { ...env, CHROME_PATH: playwright.chromium.executablePath() }, encoding: "utf8", timeout: 120000 });
       assert.equal(result.status, 0, "Lighthouse lab measurement completes");
+      const reportName = fs.readdirSync("artifacts").find(name => name.includes("lighthouse") && name.endsWith(".json"));
+      const report = JSON.parse(fs.readFileSync(path.join("artifacts", reportName), "utf8"));
+      console.log("LIGHTHOUSE_LAB", JSON.stringify({ scores: Object.fromEntries(Object.entries(report.categories).map(([key, value]) => [key, Math.round(value.score * 100)])), lcpMs: report.audits["largest-contentful-paint"].numericValue, cls: report.audits["cumulative-layout-shift"].numericValue, tbtMs: report.audits["total-blocking-time"].numericValue }));
       console.log("PASS Lighthouse lab reports saved; scores describe this CI environment only");
     }
-  } catch (error) { console.error("Integration URL:", page.url(), "Browser errors:", errors); try { console.error((await page.locator("body").innerText({ timeout: 1000 })).slice(0, 2500)); } catch { /* Keep the original error. */ } throw error; } finally { await browser.close(); }
+  } catch (error) { console.error("Integration URL:", page.url(), "Browser errors:", errors, "Navigation:", navigation); try { console.error((await page.locator("body").innerText({ timeout: 1000 })).slice(0, 2500)); } catch { /* Keep the original error. */ } throw error; } finally { await browser.close(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   for (const child of processes.reverse()) { child.kill("SIGTERM"); await new Promise(resolve => { if (child.exitCode !== null) return resolve(); const timer = setTimeout(() => { child.kill("SIGKILL"); resolve(); }, 12000); child.once("exit", () => { clearTimeout(timer); resolve(); }); }); }
