@@ -10,17 +10,16 @@ export function CartProvider({ children }) {
 
 function SessionCart({ ready, children }) {
   const [open, setOpen] = useState(false);
-  const [cart, setCart] = useState({ cartId: null, items: [] });
+  const [cart, setCart] = useState({ cartId: null, items: [], notice: null, maxQuantity: 99 });
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
   const writing = useRef(false);
   const alive = useRef(true);
   const revision = useRef(0);
-  const initialRead = useRef(null);
   const needsRefresh = useRef(false);
 
   const applyCart = useCallback((data) => {
-    setCart({ cartId: data?.cartId ?? null, items: Array.isArray(data?.items) ? data.items : [] });
+    setCart({ cartId: data?.cartId ?? null, items: Array.isArray(data?.items) ? data.items : [], notice: data?.notice || null, maxQuantity: data?.maxQuantity || 99 });
     setStatus("done");
     setError("");
     needsRefresh.current = false;
@@ -30,8 +29,7 @@ function SessionCart({ ready, children }) {
     alive.current = true;
     if (ready) {
       const version = ++revision.current;
-      initialRead.current ??= getCart();
-      initialRead.current.then((data) => {
+      getCart().then((data) => {
         if (alive.current && version === revision.current) applyCart(data);
       }).catch(() => {
         if (!alive.current || version !== revision.current) return;
@@ -94,16 +92,16 @@ function SessionCart({ ready, children }) {
   }, [mutate]);
   const setQty = useCallback((id, quantity) => {
     const value = Number(quantity);
-    if (!Number.isInteger(value) || value < 0) return Promise.resolve(false);
+    if (!Number.isInteger(value) || value < 0 || value > 99) return Promise.resolve(false);
     return mutate(() => value === 0 ? removeCartItem(id) : updateCartItem(id, value));
   }, [mutate]);
   const removeItem = useCallback((id) => mutate(() => removeCartItem(id)), [mutate]);
   const value = useMemo(() => ({
-    ...cart, open, status, error, refresh, addItem, setQty, removeItem,
+    ...cart, open, status: ready ? status : "loading", error, refresh, addItem, setQty, removeItem,
     totalCents: cart.items.reduce((sum, item) => sum + Number(item.price_cents) * Number(item.quantity), 0),
     openCart: () => setOpen(true),
     closeCart: () => setOpen(false),
     toggleCart: () => setOpen((previous) => !previous),
-  }), [cart, open, status, error, refresh, addItem, setQty, removeItem]);
+  }), [cart, open, status, error, refresh, addItem, setQty, removeItem, ready]);
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

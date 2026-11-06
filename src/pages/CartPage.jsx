@@ -17,11 +17,12 @@ const Card = styled.section`
 const money = (cents) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(cents / 100);
 
 export default function CartPage() {
-  const { items, totalCents, status, error, refresh, setQty, removeItem } = useCart();
+  const { items, notice, maxQuantity, totalCents, status, error, refresh, setQty, removeItem } = useCart();
   const busy = status === "loading" || status === "saving";
   return (
     <Card aria-busy={busy}>
       <h1>Your cart</h1>
+      {notice && <p role="status">{notice}</p>}
       {error && <div role="alert">{error}<button onClick={refresh}>Refresh cart</button></div>}
       {busy && <p role="status">Updating your cart…</p>}
       {!busy && !error && items.length === 0 && <p>Your cart is empty. <Link to="/products">Browse the shop</Link>.</p>}
@@ -31,7 +32,7 @@ export default function CartPage() {
           <div>
             <button disabled={busy} aria-label={`Decrease quantity of ${item.name}`} onClick={() => setQty(item.cart_item_id, item.quantity - 1)}>−</button>
             <span>{item.quantity}</span>
-            <button disabled={busy} aria-label={`Increase quantity of ${item.name}`} onClick={() => setQty(item.cart_item_id, item.quantity + 1)}>+</button>
+            <button disabled={busy || item.quantity >= maxQuantity} aria-label={`Increase quantity of ${item.name}`} onClick={() => setQty(item.cart_item_id, item.quantity + 1)}>+</button>
             <button disabled={busy} onClick={() => removeItem(item.cart_item_id)}>Remove</button>
           </div>
           <p>{money(item.price_cents * item.quantity)}</p>

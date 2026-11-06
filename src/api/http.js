@@ -1,9 +1,18 @@
 const API_URL = (import.meta.env?.VITE_API_URL || "/api").replace(/\/$/, "");
 
 export async function apiRequest(path, options = {}) {
+  const { timeoutMs = 15000, signal, ...requestOptions } = options;
+  const controller = new AbortController();
+  let timedOut = false;
+  const forwardAbort = () => controller.abort(signal.reason);
+  if (signal?.aborted) forwardAbort();
+  else signal?.addEventListener("abort", forwardAbort, { once: true });
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
+  try {
   const res = await fetch(`${API_URL}${path}`, {
     credentials: "include",
-    ...options,
+    ...requestOptions,
+    signal: controller.signal,
     headers: {
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...(options.headers || {}),
@@ -25,6 +34,15 @@ export async function apiRequest(path, options = {}) {
     throw error;
   }
   return data;
+  } catch (error) {
+    if (timedOut) throw Object.assign(new Error("The server is taking too long to respond. Please try again."), { code: "REQUEST_TIMEOUT" });
+    if (signal?.aborted) throw error;
+    if (error instanceof TypeError) throw Object.assign(new Error("Could not connect to the server. Check your connection and try again."), { code: "NETWORK_ERROR" });
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", forwardAbort);
+  }
 }
 
 export function apiGet(path, options = {}) {
