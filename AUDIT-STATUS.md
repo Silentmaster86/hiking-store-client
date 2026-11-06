@@ -2,7 +2,7 @@
 
 This is an implementation/retest ledger for the 30 October audit. It does not
 certify production deployment, real OAuth provider setup or full WCAG/security
-compliance. PR #1–#4 are merged; PR #5–#7 contain the remaining implementation.
+compliance. PR #1–#5 reached main. PR #6–#7 were merged into intermediate branches; direct-to-main PR #8 in each repository completes the rollout.
 Use each PR's Checks for the result for its exact commit.
 
 | Original findings | Implementation and verification |

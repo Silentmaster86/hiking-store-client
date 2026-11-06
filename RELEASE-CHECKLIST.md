@@ -2,16 +2,19 @@
 
 ## Merge and deployment order
 
-1. API/client cart-and-recovery (PR #5 in each repository).
-2. Client request-security (PR #6), then API request-security (PR #6).
-3. API catalogue-and-release (PR #7), then this client catalogue-and-release (PR #7).
+1. Merge/deploy frontend PR #8, whose base is main.
+2. Merge/deploy API PR #8, whose base is main.
+3. Complete the coordinated hosting/OAuth settings in DEPLOYMENT-SETTINGS.md.
 
-The security API requires the new write header, so deploy its client first. New
-product detail fields are optional in this client until the API migration runs.
-Stacked PRs initially target their predecessor branch. After merging a predecessor,
-retarget the next PR to main if GitHub has not already done so. Keep feature
-branches until dependent PRs have been merged. Never merge a predecessor into a
-successor in place of reviewing the successor changes.
+The earlier PR #5 reached main. PRs #6 and #7 were merged into intermediate
+branches, so their completed code still needs the two direct-to-main PRs above.
+Those PRs include all remaining security, catalogue and verification changes.
+Do not merge into a working branch or re-open the closed PRs. Verify that the
+GitHub merge target says main.
+
+The API requires the client write header, so deploy the client first. Product
+detail fields remain optional until the API migration runs. No additional
+application behaviour is introduced by the rollout correction.
 
 ## Automated checks
 
