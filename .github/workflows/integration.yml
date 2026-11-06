@@ -1,0 +1,90 @@
+name: Store integration
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      api_ref:
+        description: API commit or branch to test (empty uses the committed pin)
+        required: false
+        type: string
+  schedule:
+    - cron: '30 6 * * 1'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hiking_store_e2e
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: isolated-e2e-password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgres://postgres:isolated-e2e-password@localhost:5432/hiking_store_e2e
+      BROWSER: ${{ matrix.browser }}
+      RUN_LIGHTHOUSE: ${{ matrix.browser == 'chromium' && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: client
+      - name: Select reproducible API version
+        id: api
+        working-directory: client
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" ]]; then
+            api_ref=main
+          else
+            api_ref=$(tr -d '\n' < .github/integration-api-ref)
+            [[ "$api_ref" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          fi
+          echo "ref=$api_ref" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: Silentmaster86/hiking-store-api
+          ref: ${{ inputs.api_ref || steps.api.outputs.ref }}
+          path: api
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            api/package-lock.json
+      - run: npm ci
+        working-directory: api
+      - run: npm ci
+        working-directory: client
+      - run: npm run build
+        working-directory: client
+      - run: npm install --no-save --package-lock=false playwright@1.65.0 lighthouse@12.8.2
+        working-directory: client
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+        working-directory: client
+      - run: npm run test:e2e
+        working-directory: client
+      - name: Observe current deployment
+        if: ${{ always() && matrix.browser == 'chromium' }}
+        continue-on-error: true
+        run: node test/deployment.observe.cjs
+        working-directory: client
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-and-lighthouse-${{ matrix.browser }}
+          path: client/artifacts/
+          if-no-files-found: warn

@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import HomePage from "../pages/HomePage";
 import ProductsPage from "../pages/ProductsPage";
+import ProductDetailsPage from "../pages/ProductDetailsPage";
 import CheckoutPage from "../pages/CheckoutPage";
 import OrderConfirmationPage from "../pages/OrderConfirmationPage";
 import OrdersPage from "../pages/OrdersPage";
@@ -23,6 +24,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:id" element={<ProductDetailsPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="*" element={<NotFoundPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
