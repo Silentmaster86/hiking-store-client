@@ -41,7 +41,7 @@ async function scenario(browser, run) {
     await route.fulfill(fs.existsSync(filename) ? { body: fs.readFileSync(filename), contentType: mime } : { status: 404, body: "" });
   });
   try { await run(page, fixture); assert.deepEqual(errors, [], "No unhandled browser errors"); }
-  catch (error) { console.error("Fixture checkout posts:", fixture.posts, "Browser errors:", errors); console.error(await page.locator("main").innerText()); throw error; }
+  catch (error) { console.error("Original failure:", error); console.error("Fixture checkout posts:", fixture.posts, "Browser errors:", errors, "URL:", page.url()); try { console.error(await page.locator("body").innerText({ timeout: 1000 })); } catch { /* Keep the original failure. */ } throw error; }
   finally { await context.close(); }
 }
 async function fillCheckout(page) {
