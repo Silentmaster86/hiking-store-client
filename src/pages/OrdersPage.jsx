@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { statusLabels } from "../utils/orderFormatting";
 import { getOrders } from "../api/orders";
-import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons";
+import { SkeletonLine, SkeletonBlock } from "../components/ui/Skeletons.styles";
 
 const Wrap = styled.div`
   max-width: 900px;

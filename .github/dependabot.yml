@@ -18,6 +18,10 @@ updates:
           - "@eslint/*"
           - "eslint-plugin-*"
           - globals
+      vite-tooling:
+        patterns:
+          - vite
+          - "@vitejs/*"
   - package-ecosystem: github-actions
     directory: /
     schedule:

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useAuth } from "../../context/auth-context";
 import { useModalDialog, closeOnBackdrop } from "../../hooks/useModalDialog";
 import { useCart } from "../../context/cart-context";
-import { SkeletonLine, SkeletonBlock } from "./Skeletons";
+import { SkeletonLine, SkeletonBlock } from "./Skeletons.styles";
 
 const Panel = styled.dialog`
   position: fixed;
